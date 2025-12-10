@@ -847,7 +847,7 @@ const UserPage = () => {
         
         <main className="flex-1 overflow-y-auto p-8">
           {/* Company Selector */}
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <div className="bg-white rounded-lg p-4 border border-gray-200 inline-block">
               <div className="flex items-center gap-3">
                 <span className="text-blue-600 font-semibold">All personnel</span>
@@ -865,7 +865,7 @@ const UserPage = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Filters */}
           <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
@@ -907,7 +907,7 @@ const UserPage = () => {
                 />
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-end">
               <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2">
                 <span>🔍</span>
                 Search
