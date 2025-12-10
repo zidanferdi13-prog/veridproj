@@ -55,40 +55,11 @@ const DevicePage = () => {
         
         <main className="flex-1 overflow-y-auto p-8">
           <div className="flex gap-6">
-            {/* Left Sidebar - Groups */}
-            <div className="w-64 flex-shrink-0">
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <h3 className="font-semibold text-gray-800 mb-4">Groups</h3>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setSelectedGroup('All')}
-                    className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                      selectedGroup === 'All'
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => setSelectedGroup('Uncategorized')}
-                    className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                      selectedGroup === 'Uncategorized'
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Uncategorized
-                  </button>
-                </div>
-              </div>
-            </div>
-
             {/* Main Content */}
             <div className="flex-1">
               {/* Filters */}
               <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-5 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Device
@@ -153,30 +124,8 @@ const DevicePage = () => {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Create Time
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        placeholder="startTime"
-                        value={filters.startDate}
-                        onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-gray-500">-</span>
-                      <input
-                        type="text"
-                        placeholder="endTime"
-                        value={filters.endDate}
-                        onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 justify-end">
                   <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2">
                     <span>🔍</span>
                     Search

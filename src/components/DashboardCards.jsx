@@ -1,7 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Users, TrendingUp, ArrowUpRight } from 'lucide-react';
 
-const StatCard = ({ icon: Icon, title, value, subtitle, trend, bgColor }) => {
+const StatCard = ({ icon: Icon, title, value, subtitle, trend, bgColor, onTrendClick }) => {
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-4">
@@ -12,7 +13,10 @@ const StatCard = ({ icon: Icon, title, value, subtitle, trend, bgColor }) => {
           <h3 className="text-gray-600 font-medium">{title}</h3>
         </div>
         {trend && (
-          <button className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors">
+          <button 
+            onClick={onTrendClick}
+            className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors"
+          >
             <ArrowUpRight size={16} className="text-white" />
           </button>
         )}
@@ -47,6 +51,8 @@ const TopEmployeeCard = () => {
 };
 
 const DashboardCards = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="grid grid-cols-3 gap-6 mb-6">
       <StatCard
@@ -55,6 +61,7 @@ const DashboardCards = () => {
         value="5"
         trend={true}
         bgColor="bg-gray-100"
+        onTrendClick={() => navigate('/device')}
       />
       <StatCard
         icon={Users}
@@ -63,6 +70,7 @@ const DashboardCards = () => {
         subtitle="/200"
         trend={true}
         bgColor="bg-gray-100"
+        onTrendClick={() => navigate('/attendance')}
       />
       <TopEmployeeCard />
     </div>

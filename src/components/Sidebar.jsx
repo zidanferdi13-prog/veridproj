@@ -48,9 +48,11 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       {/* Logo */}
       <div className="p-6 flex items-center gap-3 justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Scan className="text-white" size={24} />
-          </div>
+          <img 
+            src="/images/Veridface Sticker 5x5cm.jpg" 
+            alt="VerifIDFace Logo" 
+            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+          />
           {!isCollapsed && <span className="text-xl font-bold text-gray-800">VerifIDFace</span>}
         </div>
         <button 
