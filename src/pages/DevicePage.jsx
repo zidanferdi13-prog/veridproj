@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Sidebar, Header } from '@components';
-import { AddDeviceModal, ConfigurationModal, DeleteConfirmModal } from '@components/features/device';
+import { AddDeviceModal, ConfigurationModal, DeleteConfirmModal, RemoteUnlockModal, EditDeviceModal, PermissionQueryModal } from '@components/features/device';
 import { useModal, useFilters, useSelection, useFormData } from '@hooks';
 import { RotateCcw, X } from 'lucide-react';
 
@@ -38,8 +38,20 @@ const DevicePage = () => {
   const addModal = useModal();
   const configModal = useModal();
   const deleteModal = useModal();
+  const remoteUnlockModal = useModal();
+  const editModal = useModal();
+  const permissionQueryModal = useModal();
+  const [selectedDevice, setSelectedDevice] = useState(null);
   
-  const { formData: deviceFormData, handleChange: handleDeviceFormChange, resetForm: resetDeviceForm } = useFormData({
+  const { formData: deviceFormData, handleChange: handleDeviceFormChange, resetForm: resetDeviceForm, setForm: setDeviceForm } = useFormData({
+    sn: '',
+    model: '',
+    device: '',
+    groups: '',
+    note: '',
+  });
+
+  const { formData: editFormData, handleChange: handleEditFormChange, resetForm: resetEditForm, setForm: setEditForm } = useFormData({
     sn: '',
     model: '',
     device: '',
@@ -103,6 +115,39 @@ const DevicePage = () => {
   const handleGenConfigCode = () => {
     console.log('Generating config code with:', configData);
     alert('Config code generated!');
+  };
+
+  const handleRemoteUnlockClick = (device) => {
+    setSelectedDevice(device);
+    remoteUnlockModal.open();
+  };
+
+  const handleRemoteUnlockConfirm = () => {
+    console.log('Remote unlock confirmed for:', selectedDevice);
+    alert(`Remote unlock successful for ${selectedDevice.device}!`);
+  };
+
+  const handleEditClick = (device) => {
+    setSelectedDevice(device);
+    setEditForm({
+      sn: device.sn,
+      model: device.model,
+      device: device.device,
+      groups: device.groups,
+      note: device.note || '',
+    });
+    editModal.open();
+  };
+
+  const handleEditConfirm = () => {
+    console.log('Editing device:', editFormData);
+    alert(`Device ${editFormData.device} updated successfully!`);
+    editModal.close();
+  };
+
+  const handlePermissionQueryClick = (device) => {
+    setSelectedDevice(device);
+    permissionQueryModal.open();
   };
 
   return (
@@ -285,13 +330,22 @@ const DevicePage = () => {
                               >
                                 Configuration
                               </button>
-                              <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                              <button 
+                                onClick={() => handleRemoteUnlockClick(device)}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
                                 Remote Unlock
                               </button>
-                              <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                              <button 
+                                onClick={() => handleEditClick(device)}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
                                 Edit
                               </button>
-                              <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                              <button 
+                                onClick={() => handlePermissionQueryClick(device)}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
                                 Permission query
                               </button>
                             </div>
@@ -364,6 +418,30 @@ const DevicePage = () => {
           onClose={deleteModal.close}
           onConfirm={handleDeleteConfirm}
           selectedCount={selectedDevices.length}
+        />
+
+        {/* Remote Unlock Modal */}
+        <RemoteUnlockModal
+          isOpen={remoteUnlockModal.isOpen}
+          onClose={remoteUnlockModal.close}
+          onConfirm={handleRemoteUnlockConfirm}
+          deviceName={selectedDevice?.device}
+        />
+
+        {/* Edit Device Modal */}
+        <EditDeviceModal
+          isOpen={editModal.isOpen}
+          onClose={editModal.close}
+          onConfirm={handleEditConfirm}
+          formData={editFormData}
+          onFormChange={handleEditFormChange}
+        />
+
+        {/* Permission Query Modal */}
+        <PermissionQueryModal
+          isOpen={permissionQueryModal.isOpen}
+          onClose={permissionQueryModal.close}
+          deviceName={selectedDevice?.device}
         />
       </div>
     </div>
