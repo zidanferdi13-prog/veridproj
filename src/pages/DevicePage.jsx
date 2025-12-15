@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Sidebar, Header } from '@components';
+import { AddDeviceModal, ConfigurationModal, DeleteConfirmModal } from '@components/features/device';
+import { useModal, useFilters, useSelection, useFormData } from '@hooks';
 import { RotateCcw, X } from 'lucide-react';
 
 const deviceData = [
@@ -16,361 +18,36 @@ const deviceData = [
   },
 ];
 
-// Add Device Modal Component
-const AddDeviceModal = ({ isOpen, onClose, formData, onFormChange, onConfirm }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Tambahkan perangkat</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <X size={24} className="text-gray-500" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-4">
-          {/* SN */}
-          <div className="flex items-center gap-4">
-            <label className="w-32 text-right text-gray-700">
-              <span className="text-red-500">*</span> SN
-            </label>
-            <input
-              type="text"
-              placeholder="Please enter"
-              value={formData.sn}
-              onChange={(e) => onFormChange('sn', e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Model */}
-          <div className="flex items-center gap-4">
-            <label className="w-32 text-right text-gray-700">
-              <span className="text-red-500">*</span> Model
-            </label>
-            <select
-              value={formData.model}
-              onChange={(e) => onFormChange('model', e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select</option>
-              <option value="VF104">VF104</option>
-              <option value="VF105">VF105</option>
-              <option value="VF106">VF106</option>
-            </select>
-          </div>
-
-          {/* Device */}
-          <div className="flex items-center gap-4">
-            <label className="w-32 text-right text-gray-700">
-              <span className="text-red-500">*</span> Device
-            </label>
-            <input
-              type="text"
-              placeholder="Please enter"
-              value={formData.device}
-              onChange={(e) => onFormChange('device', e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Groups */}
-          <div className="flex items-center gap-4">
-            <label className="w-32 text-right text-gray-700">Groups</label>
-            <select
-              value={formData.groups}
-              onChange={(e) => onFormChange('groups', e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Please select</option>
-              <option value="Ungrouped">Ungrouped</option>
-              <option value="Group A">Group A</option>
-              <option value="Group B">Group B</option>
-            </select>
-          </div>
-
-          {/* Note */}
-          <div className="flex items-start gap-4">
-            <label className="w-32 text-right text-gray-700 pt-2">Note</label>
-            <textarea
-              placeholder="Please enter"
-              value={formData.note}
-              onChange={(e) => onFormChange('note', e.target.value)}
-              rows={4}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center gap-4 p-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-8 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-          >
-            <X size={18} />
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-8 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors font-medium flex items-center gap-2"
-          >
-            <span>✓</span>
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Configuration Modal Component
-const ConfigurationModal = ({ isOpen, onClose, configData, onConfigChange, onConfirm, onGenConfigCode }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Konfigurasi perangkat</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <X size={24} className="text-gray-500" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-6">
-          {/* IP Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <label className="w-32 text-right text-gray-700">IP</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onConfigChange('ipType', 'dynamic')}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    configData.ipType === 'dynamic'
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Dynamic
-                </button>
-                <button
-                  onClick={() => onConfigChange('ipType', 'static')}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    configData.ipType === 'static'
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Static
-                </button>
-              </div>
-            </div>
-
-            {/* Static IP Fields */}
-            {configData.ipType === 'static' && (
-              <>
-                <div className="flex items-center gap-4">
-                  <label className="w-32 text-right text-gray-700">IP address</label>
-                  <input
-                    type="text"
-                    placeholder="Please enter"
-                    value={configData.ipAddress}
-                    onChange={(e) => onConfigChange('ipAddress', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <label className="w-32 text-right text-gray-700">Subnet mask</label>
-                  <input
-                    type="text"
-                    placeholder="Please enter"
-                    value={configData.subnetMask}
-                    onChange={(e) => onConfigChange('subnetMask', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <label className="w-32 text-right text-gray-700">Gateway</label>
-                  <input
-                    type="text"
-                    placeholder="Please enter"
-                    value={configData.gateway}
-                    onChange={(e) => onConfigChange('gateway', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <label className="w-32 text-right text-gray-700">DNS</label>
-                  <input
-                    type="text"
-                    placeholder="Please enter"
-                    value={configData.dns}
-                    onChange={(e) => onConfigChange('dns', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="border-t border-gray-200"></div>
-
-          {/* Network Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <label className="w-32 text-right text-gray-700">Network</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onConfigChange('networkType', 'ethernet')}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    configData.networkType === 'ethernet'
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Ethernet
-                </button>
-                <button
-                  onClick={() => onConfigChange('networkType', 'wifi')}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    configData.networkType === 'wifi'
-                      ? 'bg-cyan-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  WiFi
-                </button>
-              </div>
-            </div>
-
-            {/* WiFi Fields */}
-            {configData.networkType === 'wifi' && (
-              <>
-                <div className="flex items-center gap-4">
-                  <label className="w-32 text-right text-gray-700">WIFI name</label>
-                  <input
-                    type="text"
-                    placeholder="BIL-Guest"
-                    value={configData.wifiName}
-                    onChange={(e) => onConfigChange('wifiName', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <label className="w-32 text-right text-gray-700">WIFI password</label>
-                  <input
-                    type="password"
-                    placeholder="BILguest2@"
-                    value={configData.wifiPassword}
-                    onChange={(e) => onConfigChange('wifiPassword', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="border-t border-gray-200"></div>
-
-        <div className="flex flex-col items-center gap-4 p-6">
-          <button
-            onClick={onGenConfigCode}
-            className="px-8 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center gap-2"
-          >
-            <span>⚙️</span>
-            Gen Config Code
-          </button>
-          <div className="flex gap-4">
-            <button
-              onClick={onClose}
-              className="px-8 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-            >
-              <X size={18} />
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              className="px-8 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors font-medium flex items-center gap-2"
-            >
-              <span>✓</span>
-              Confirm
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Delete Confirmation Modal Component
-const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, selectedCount }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Delete Confirmation</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <X size={24} className="text-gray-500" />
-          </button>
-        </div>
-
-        <div className="p-6">
-          <p className="text-gray-700 text-center mb-2">
-            Are you sure you want to delete {selectedCount} selected device(s)?
-          </p>
-          <p className="text-gray-500 text-sm text-center">
-            This action cannot be undone.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-center gap-4 p-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-8 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-          >
-            No
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-8 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
-          >
-            Yes
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const DevicePage = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState('All');
-  const [selectedDevices, setSelectedDevices] = useState([]);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [deviceFormData, setDeviceFormData] = useState({
+  
+  // Use custom hooks
+  const { filters, handleFilterChange, resetFilters } = useFilters({
+    device: '',
+    model: '',
+    onOff: '',
+    status: '',
+    sn: '',
+    startDate: '',
+    endDate: '',
+  });
+  
+  const { selectedItems: selectedDevices, toggleSelectAll, toggleItem, setSelectedItems } = useSelection();
+  
+  const addModal = useModal();
+  const configModal = useModal();
+  const deleteModal = useModal();
+  
+  const { formData: deviceFormData, handleChange: handleDeviceFormChange, resetForm: resetDeviceForm } = useFormData({
     sn: '',
     model: '',
     device: '',
     groups: '',
     note: '',
   });
-  const [configData, setConfigData] = useState({
+  
+  const { formData: configData, handleChange: handleConfigChange, resetForm: resetConfigForm } = useFormData({
     ipType: 'dynamic',
     ipAddress: '',
     subnetMask: '',
@@ -380,46 +57,13 @@ const DevicePage = () => {
     wifiName: '',
     wifiPassword: '',
   });
-  const [filters, setFilters] = useState({
-    device: '',
-    model: '',
-    onOff: '',
-    status: '',
-    sn: '',
-    startDate: '',
-    endDate: '',
-  });
-
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleReset = () => {
-    setFilters({
-      device: '',
-      model: '',
-      onOff: '',
-      status: '',
-      sn: '',
-      startDate: '',
-      endDate: '',
-    });
-  };
 
   const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      setSelectedDevices(deviceData.map(device => device.id));
-    } else {
-      setSelectedDevices([]);
-    }
+    toggleSelectAll(e, deviceData);
   };
 
   const handleSelectDevice = (deviceId) => {
-    if (selectedDevices.includes(deviceId)) {
-      setSelectedDevices(selectedDevices.filter(id => id !== deviceId));
-    } else {
-      setSelectedDevices([...selectedDevices, deviceId]);
-    }
+    toggleItem(deviceId);
   };
 
   const handleDelete = () => {
@@ -427,77 +71,37 @@ const DevicePage = () => {
       alert('Please select devices to delete');
       return;
     }
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleCloseDeleteModal = () => {
-    setIsDeleteModalOpen(false);
+    deleteModal.open();
   };
 
   const handleDeleteConfirm = () => {
     console.log('Deleting devices:', selectedDevices);
-    // Logic untuk delete devices
-    setSelectedDevices([]);
-    handleCloseDeleteModal();
+    setSelectedItems([]);
+    deleteModal.close();
   };
 
   const handleAddDevice = () => {
-    setDeviceFormData({
-      sn: '',
-      model: '',
-      device: '',
-      groups: '',
-      note: '',
-    });
-    setIsAddModalOpen(true);
-  };
-
-  const handleCloseAddModal = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const handleDeviceFormChange = (field, value) => {
-    setDeviceFormData(prev => ({ ...prev, [field]: value }));
+    resetDeviceForm();
+    addModal.open();
   };
 
   const handleAddConfirm = () => {
     console.log('Adding device:', deviceFormData);
-    // Logic untuk add device
-    handleCloseAddModal();
+    addModal.close();
   };
 
   const handleConfigurationClick = (device) => {
-    // Reset config data atau load dari device yang dipilih
-    setConfigData({
-      ipType: 'dynamic',
-      ipAddress: '',
-      subnetMask: '',
-      gateway: '',
-      dns: '',
-      networkType: 'ethernet',
-      wifiName: '',
-      wifiPassword: '',
-    });
-    setIsConfigModalOpen(true);
-  };
-
-  const handleCloseConfigModal = () => {
-    setIsConfigModalOpen(false);
-  };
-
-  const handleConfigChange = (field, value) => {
-    setConfigData(prev => ({ ...prev, [field]: value }));
+    resetConfigForm();
+    configModal.open();
   };
 
   const handleConfigConfirm = () => {
     console.log('Configuration data:', configData);
-    // Logic untuk save configuration
-    handleCloseConfigModal();
+    configModal.close();
   };
 
   const handleGenConfigCode = () => {
     console.log('Generating config code with:', configData);
-    // Logic untuk generate config code
     alert('Config code generated!');
   };
 
@@ -586,7 +190,7 @@ const DevicePage = () => {
                     Search
                   </button>
                   <button 
-                    onClick={handleReset}
+                    onClick={resetFilters}
                     className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
                   >
                     <RotateCcw size={16} />
@@ -737,8 +341,8 @@ const DevicePage = () => {
 
         {/* Add Device Modal */}
         <AddDeviceModal
-          isOpen={isAddModalOpen}
-          onClose={handleCloseAddModal}
+          isOpen={addModal.isOpen}
+          onClose={addModal.close}
           formData={deviceFormData}
           onFormChange={handleDeviceFormChange}
           onConfirm={handleAddConfirm}
@@ -746,8 +350,8 @@ const DevicePage = () => {
 
         {/* Configuration Modal */}
         <ConfigurationModal
-          isOpen={isConfigModalOpen}
-          onClose={handleCloseConfigModal}
+          isOpen={configModal.isOpen}
+          onClose={configModal.close}
           configData={configData}
           onConfigChange={handleConfigChange}
           onConfirm={handleConfigConfirm}
@@ -756,8 +360,8 @@ const DevicePage = () => {
 
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
-          isOpen={isDeleteModalOpen}
-          onClose={handleCloseDeleteModal}
+          isOpen={deleteModal.isOpen}
+          onClose={deleteModal.close}
           onConfirm={handleDeleteConfirm}
           selectedCount={selectedDevices.length}
         />
