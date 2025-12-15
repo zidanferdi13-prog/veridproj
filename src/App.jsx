@@ -1,17 +1,19 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import UserPage from './pages/UserPage';
-import DevicePage from './pages/DevicePage';
-import PermissionPage from './pages/PermissionPage';
-import VisitorPage from './pages/VisitorPage';
-import AttendanceSysPage from './pages/AttendanceSysPage';
-import AttendancePage from './pages/AttendancePage';
-import LogPage from './pages/LogPage';
-import SettingsPage from './pages/SettingsPage';
+import { AuthProvider } from '@context';
+import { ProtectedRoute } from '@components';
+import {
+  LoginPage,
+  DashboardPage,
+  UserPage,
+  DevicePage,
+  PermissionPage,
+  VisitorPage,
+  AttendanceSysPage,
+  AttendancePage,
+  LogPage,
+  SettingsPage,
+} from '@pages';
 
 function App() {
   return (

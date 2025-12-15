@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
-import DashboardCards from '../components/DashboardCards';
-import Charts from '../components/Charts';
-import RealTimeAccessMonitoring from '../components/RealTimeAccessMonitoring';
+import { Sidebar, Header, DashboardCards, Charts, RealTimeAccessMonitoring } from '@components';
 
 const DashboardPage = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);

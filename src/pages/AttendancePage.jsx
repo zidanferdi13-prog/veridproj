@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
+import { Sidebar, Header } from '@components';
 import { RotateCcw } from 'lucide-react';
 
 const attendanceData = [
