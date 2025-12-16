@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Sidebar, Header } from '@components';
 import { RotateCcw } from 'lucide-react';
+import { WorkTimeModal, ExportConfirmModal } from '@components/features/attendance/modals';
 
 const attendanceData = [
   { id: 1, name: 'Andhika', group: '-', phone: '-', date: '2025-12-09', clockIn: '-', deviceIn: '-', clockOut: '-', deviceOut: '-', duration: '-', lateness: '-', departure: '-' },
@@ -11,9 +13,16 @@ const attendanceData = [
   { id: 6, name: 'Kiayi Khalis', group: '-', phone: '-', date: '2025-12-09', clockIn: '-', deviceIn: '-', clockOut: '-', deviceOut: '-', duration: '-', lateness: '-', departure: '-' },
 ];
 
-const AttendancePage = () => {
+const AttendancePage = ({ initialTab }) => {
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('details');
+  const initial = (location && location.state && location.state.initialTab) || initialTab || 'details';
+  const [activeTab, setActiveTab] = useState(initial);
+  useEffect(() => {
+    if (location && location.state && location.state.initialTab) {
+      setActiveTab(location.state.initialTab);
+    }
+  }, [location && location.state && location.state.initialTab]);
   const [filters, setFilters] = useState({
     group: '',
     name: '',
@@ -21,9 +30,46 @@ const AttendancePage = () => {
     startDate: '2025-12-09',
     endDate: '2025-12-09',
   });
+  const [isWorkModalOpen, setIsWorkModalOpen] = useState(false);
+  const [isExportConfirmOpen, setIsExportConfirmOpen] = useState(false);
+  const [workTime, setWorkTime] = useState({ start: '09:00', end: '18:00' });
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleWorkConfirm = ({ startTime, endTime }) => {
+    setWorkTime({ start: startTime, end: endTime });
+    // TODO: persist to backend
+    // eslint-disable-next-line no-console
+    console.log('Work time set to', startTime, endTime);
+  };
+
+  const generateCSV = (rows) => {
+    const header = ['Name','Group','Phone','Date','Clock in','Device in','Clock out','Device out','Duration (H)','Lateness (H)','Departure (H)'];
+    const lines = [header.join(',')];
+    rows.forEach(r => {
+      const row = [r.name, r.group, r.phone, r.date, r.clockIn, r.deviceIn, r.clockOut, r.deviceOut, r.duration, r.lateness, r.departure];
+      // escape commas/newlines
+      const esc = row.map(cell => `"${String(cell).replace(/"/g, '""')}"`);
+      lines.push(esc.join(','));
+    });
+    return lines.join('\n');
+  };
+
+  const handleExport = () => {
+    // In real app apply filters - here we export the static attendanceData
+    const rows = attendanceData; // TODO: apply filters
+    const csv = generateCSV(rows);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_export_${filters.startDate}_${filters.endDate}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleReset = () => {
@@ -145,13 +191,33 @@ const AttendancePage = () => {
 
           {/* Action Buttons */}
           <div className="mb-6 flex flex-wrap gap-3">
-            <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200">
+            <button
+              onClick={() => setIsWorkModalOpen(true)}
+              className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200">
               ⚙️ Work time settings
             </button>
-            <button className="px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors font-medium border border-orange-200">
+            <button
+              onClick={() => setIsExportConfirmOpen(true)}
+              className="px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors font-medium border border-orange-200">
               📥 Export
             </button>
           </div>
+
+          {/* Modals */}
+          <WorkTimeModal
+            isOpen={isWorkModalOpen}
+            onClose={() => setIsWorkModalOpen(false)}
+            onConfirm={handleWorkConfirm}
+            initialStart={workTime.start}
+            initialEnd={workTime.end}
+          />
+
+          <ExportConfirmModal
+            isOpen={isExportConfirmOpen}
+            onClose={() => setIsExportConfirmOpen(false)}
+            onConfirm={handleExport}
+            message={`Date range: ${filters.startDate}-${filters.endDate}, Personnel count: ${attendanceData.length}. Are you sure to export?`}
+          />
 
           {/* Table */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">

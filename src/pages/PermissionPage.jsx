@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar, Header } from '@components';
-import { AddGroupModal, DeleteConfirmModal } from '@components/features/permission';
+import { useLocation } from 'react-router-dom';
+import { AddGroupModal, DeleteConfirmModal, RenameModal, AdjustPersonnelModal, AdjustTimeModal } from '@components/features/permission';
 import { RotateCcw } from 'lucide-react';
 
 // ==================== DATA ====================
@@ -28,13 +30,19 @@ const permissionGroupData = [
 const PermissionPage = () => {
   // ========== STATE ==========
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('personnel'); // 'personnel' or 'permission'
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location?.state?.initialTab || 'personnel'); // 'personnel' or 'permission'
   const [selectedItems, setSelectedItems] = useState([]);
   
   // Modal states
   const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [groupName, setGroupName] = useState('');
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isAdjustPersonnelModalOpen, setIsAdjustPersonnelModalOpen] = useState(false);
+  const [isAdjustTimeModalOpen, setIsAdjustTimeModalOpen] = useState(false);
+  const [activeRowItem, setActiveRowItem] = useState(null);
   
   // Filters untuk Personnel Permission tab
   const [personnelFilters, setPersonnelFilters] = useState({
@@ -55,6 +63,16 @@ const PermissionPage = () => {
   const handlePermissionFilterChange = (field, value) => {
     setPermissionFilters(prev => ({ ...prev, [field]: value }));
   };
+
+  // If the route is navigated to with location.state.initialTab (from other pages),
+  // update the active tab. Some router setups reuse the component instance so
+  // reading it only on mount (useState initializer) isn't enough.
+  useEffect(() => {
+    const initial = location?.state?.initialTab;
+    if (initial && initial !== activeTab) {
+      setActiveTab(initial);
+    }
+  }, [location?.state?.initialTab]);
 
   const handleSelectItem = (id) => {
     if (selectedItems.includes(id)) {
@@ -93,6 +111,27 @@ const PermissionPage = () => {
     // TODO: Add API call to delete selected items
     setSelectedItems([]);
     setIsDeleteModalOpen(false);
+  };
+
+  const handleRenameConfirm = (newName) => {
+    console.log('Rename item:', activeRowItem, '->', newName);
+    // TODO: call API to rename
+    setIsRenameModalOpen(false);
+    setActiveRowItem(null);
+  };
+
+  const handleAdjustPersonnelConfirm = (selected) => {
+    console.log('Adjust personnel for:', activeRowItem, 'selected:', selected);
+    // TODO: call API to update personnel mapping
+    setIsAdjustPersonnelModalOpen(false);
+    setActiveRowItem(null);
+  };
+
+  const handleAdjustTimeConfirm = (payload) => {
+    console.log('Adjust time for:', activeRowItem, payload);
+    // TODO: call API to update effective time
+    setIsAdjustTimeModalOpen(false);
+    setActiveRowItem(null);
   };
 
   // ========== RENDER ==========
@@ -234,16 +273,28 @@ const PermissionPage = () => {
                         <td className="py-4 px-6 text-gray-700">{item.effectivePeriod}</td>
                         <td className="py-4 px-6">
                           <div className="flex flex-col gap-1">
-                            <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                            <button
+                              onClick={() => { setActiveRowItem(item); setIsRenameModalOpen(true); }}
+                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                            >
                               Rename
                             </button>
-                            <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                            <button
+                              onClick={() => { setActiveRowItem(item); setIsAdjustPersonnelModalOpen(true); }}
+                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                            >
                               Adjust Personnel
                             </button>
-                            <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                            <button
+                              onClick={() => navigate('/device')}
+                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                            >
                               Adjust Device
                             </button>
-                            <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                            <button
+                              onClick={() => { setActiveRowItem(item); setIsAdjustTimeModalOpen(true); }}
+                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                            >
                               Adjust Time
                             </button>
                           </div>
@@ -370,10 +421,16 @@ const PermissionPage = () => {
                         <td className="py-4 px-6 text-gray-700">{item.trafficDeviceCount}</td>
                         <td className="py-4 px-6">
                           <div className="flex flex-col gap-1">
-                            <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                            <button
+                              onClick={() => { setActiveRowItem(item); setIsRenameModalOpen(true); }}
+                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                            >
                               Rename
                             </button>
-                            <button className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left">
+                            <button
+                              onClick={() => navigate('/device')}
+                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                            >
                               Adjust Device
                             </button>
                           </div>
@@ -437,6 +494,27 @@ const PermissionPage = () => {
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteConfirm}
           message={`Confirm removing the selected ${selectedItems.length} permission group(s)?`}
+        />
+
+        <RenameModal
+          isOpen={isRenameModalOpen}
+          onClose={() => setIsRenameModalOpen(false)}
+          currentName={activeRowItem ? (activeRowItem.group || activeRowItem.visitorPermission || '') : ''}
+          onConfirm={handleRenameConfirm}
+        />
+
+        <AdjustPersonnelModal
+          isOpen={isAdjustPersonnelModalOpen}
+          onClose={() => setIsAdjustPersonnelModalOpen(false)}
+          onConfirm={handleAdjustPersonnelConfirm}
+          initialSelected={[]}
+        />
+
+        <AdjustTimeModal
+          isOpen={isAdjustTimeModalOpen}
+          onClose={() => setIsAdjustTimeModalOpen(false)}
+          onConfirm={handleAdjustTimeConfirm}
+          initial={{ type: 'permanent' }}
         />
       </div>
     </div>

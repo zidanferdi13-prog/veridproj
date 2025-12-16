@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@context';
 import { ProtectedRoute } from '@components';
 import {
@@ -15,10 +15,21 @@ import {
   SettingsPage,
 } from '@pages';
 
+// Dev helper: logs route changes to console to aid debugging navigation issues
+const RouterLogger = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[RouterLogger] pathname=', location.pathname, 'state=', location.state);
+  }, [location.pathname, location.state]);
+  return null;
+};
+
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <RouterLogger />
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route 
@@ -76,6 +87,14 @@ function App() {
                 <AttendancePage />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/attendance/statistics"
+            element={
+              <ProtectedRoute>
+                <AttendancePage initialTab="statistics" />
+              </ProtectedRoute>
+            }
           />
           <Route 
             path="/log" 

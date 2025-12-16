@@ -40,128 +40,229 @@ const SettingsPage = () => {
             </button>
           </div>
 
-          <div className="bg-white rounded-lg p-8 border border-gray-200">
-            {/* Account Information Section */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">Account information</h3>
-              
-              <div className="grid grid-cols-4 gap-6 mb-6">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 mb-2">Organization administrator</div>
-                  <div className="text-gray-800 font-medium">David Beckham</div>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 mb-2">Administrator's mail</div>
-                  <div className="text-gray-800 font-medium">yazid@veridface.com</div>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 mb-2">Organization name</div>
-                  <div className="text-gray-800 font-medium">Veridface Company</div>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 mb-2">Organization Id</div>
-                  <div className="text-gray-800 font-medium">9z1c1jydzv1dgpzf</div>
-                </div>
-              </div>
+          <div className="bg-white rounded-lg border border-gray-200">
+            {activeTab === 'system' && (
+              <div className="p-8">
+                {/* Account Information Section */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-6">Account information</h3>
+                  
+                  <div className="grid grid-cols-4 gap-6 mb-6">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 mb-2">Organization administrator</div>
+                      <div className="text-gray-800 font-medium">David Beckham</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 mb-2">Administrator's mail</div>
+                      <div className="text-gray-800 font-medium">yazid@veridface.com</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 mb-2">Organization name</div>
+                      <div className="text-gray-800 font-medium">Veridface Company</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 mb-2">Organization Id</div>
+                      <div className="text-gray-800 font-medium">9z1c1jydzv1dgpzf</div>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-3 gap-6">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 mb-2">appKey</div>
-                  <div className="text-gray-800 font-medium">9z1c1jydzv1dgpzf</div>
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 mb-2">appKey</div>
+                      <div className="text-gray-800 font-medium">9z1c1jydzv1dgpzf</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 mb-2">appSecret</div>
+                      <div className="text-gray-800 font-medium">l54ckwoq6wwxdifpz9ifie5u0cj0lf7x</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 mb-2">Version number</div>
+                      <div className="text-gray-800 font-medium">V1.0.4</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 mb-2">appSecret</div>
-                  <div className="text-gray-800 font-medium">l54ckwoq6wwxdifpz9ifie5u0cj0lf7x</div>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-sm text-gray-600 mb-2">Version number</div>
-                  <div className="text-gray-800 font-medium">V1.0.4</div>
-                </div>
-              </div>
-            </div>
 
-            {/* Account Settings Section */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">Account settings</h3>
-              
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-700 font-medium min-w-[200px]">Access QR code configuration</span>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                {/* Account Settings Section */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-6">Account settings</h3>
+                  
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-700 font-medium min-w-[200px]">Access QR code configuration</span>
+                      <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="qrCode"
+                            value="dynamic"
+                            checked={qrCodeType === 'dynamic'}
+                            onChange={(e) => setQrCodeType(e.target.value)}
+                            className="w-4 h-4 text-blue-500 focus:ring-blue-500"
+                          />
+                          <span className={`${qrCodeType === 'dynamic' ? 'text-blue-500 font-medium' : 'text-gray-700'}`}>
+                            Vguang dynamic code
+                          </span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="qrCode"
+                            value="static"
+                            checked={qrCodeType === 'static'}
+                            onChange={(e) => setQrCodeType(e.target.value)}
+                            className="w-4 h-4 text-gray-400 focus:ring-gray-400"
+                          />
+                          <span className={`${qrCodeType === 'static' ? 'text-gray-800' : 'text-gray-700'}`}>
+                            Static pass-through code
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Time Zone Section */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-6">Time zone</h3>
+                  
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-700 font-medium min-w-[200px]">Time zone</span>
+                      <select
+                        value={timezone}
+                        onChange={(e) => setTimezone(e.target.value)}
+                        className="flex-1 max-w-md px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      >
+                        <option value="Asia/Shanghai (UTC+8)">Asia/Shanghai (UTC+8)</option>
+                        <option value="Asia/Jakarta (UTC+7)">Asia/Jakarta (UTC+7)</option>
+                        <option value="America/New_York (UTC-5)">America/New_York (UTC-5)</option>
+                        <option value="Europe/London (UTC+0)">Europe/London (UTC+0)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Callback Settings Section */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-6">Callback settings</h3>
+                  
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <span className="text-gray-700 font-medium min-w-[200px] pt-2">Callback settings</span>
                       <input
-                        type="radio"
-                        name="qrCode"
-                        value="dynamic"
-                        checked={qrCodeType === 'dynamic'}
-                        onChange={(e) => setQrCodeType(e.target.value)}
-                        className="w-4 h-4 text-cyan-500 focus:ring-cyan-500"
+                        type="text"
+                        placeholder="Please enter"
+                        value={callbackSettings}
+                        onChange={(e) => setCallbackSettings(e.target.value)}
+                        className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-                      <span className={`${qrCodeType === 'dynamic' ? 'text-blue-500 font-medium' : 'text-gray-700'}`}>
-                        ✓ Vguang dynamic code
-                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* App Download Section */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-6">App Download</h3>
+                  <div className="text-sm text-gray-600">
+                    Download the mobile application to install on Android devices
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'form' && (
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-gray-800">Visitor invitation form</h3>
+                  <button className="text-blue-400 hover:text-blue-500 font-medium">
+                    Save
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {/* My name */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">My name</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-blue-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="qrCode"
-                        value="static"
-                        checked={qrCodeType === 'static'}
-                        onChange={(e) => setQrCodeType(e.target.value)}
-                        className="w-4 h-4 text-gray-400 focus:ring-gray-400"
-                      />
-                      <span className="text-gray-700">Static pass-through code</span>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">Phone</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-blue-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">Email</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-blue-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+
+                  {/* Interviewee */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">Interviewee</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-400 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+
+                  {/* Interviewee phone/email */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">Interviewee phone/email</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-400 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+
+                  {/* Face */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">Face</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-blue-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+
+                  {/* Note */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">Note</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-blue-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+
+                  {/* Time */}
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <span className="text-gray-700">Time</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-blue-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+
+                  {/* Visitor code expiration time */}
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-gray-700">Visitor code expiration time</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-400 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                     </label>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Time Zone Section */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">Time zone</h3>
-              
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-700 font-medium min-w-[200px]">Time zone</span>
-                  <select
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    className="flex-1 max-w-md px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Asia/Shanghai (UTC+8)">Asia/Shanghai (UTC+8)</option>
-                    <option value="Asia/Jakarta (UTC+7)">Asia/Jakarta (UTC+7)</option>
-                    <option value="America/New_York (UTC-5)">America/New_York (UTC-5)</option>
-                    <option value="Europe/London (UTC+0)">Europe/London (UTC+0)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Callback Settings Section */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">Callback settings</h3>
-              
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="flex items-start gap-4">
-                  <span className="text-gray-700 font-medium min-w-[200px] pt-2">Callback settings</span>
-                  <input
-                    type="text"
-                    placeholder="Please enter"
-                    value={callbackSettings}
-                    onChange={(e) => setCallbackSettings(e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <div className="flex justify-end">
-              <button className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
-                Save Changes
-              </button>
-            </div>
+            )}
           </div>
         </main>
       </div>
