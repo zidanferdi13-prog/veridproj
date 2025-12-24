@@ -1,44 +1,54 @@
-import React, { useState } from 'react';
-import { Sidebar, Header } from '@components';
-import { EditUserModal, AddPersonnelModal, CredentialModal, ImportModal, ExportConfirmModal, DeleteConfirmModal } from '@components/features/user';
-import { RotateCcw, Eye, CreditCard } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Sidebar, Header } from "@components";
+import {
+  EditUserModal,
+  AddPersonnelModal,
+  CredentialModal,
+  ImportModal,
+  ExportConfirmModal,
+  DeleteConfirmModal,
+} from "@components/features/user";
+import { Toast } from "@components/common/Toast";
+import { RotateCcw, Eye, CreditCard } from "lucide-react";
+import { getDataUser } from "../utils/user";
+import axios from "axios";
 
 // ==================== DATA ====================
 const userData = [
   {
     id: 1,
-    name: 'Andhika',
-    phone: '-',
-    email: '-',
-    group: 'Veridface Company',
-    createTime: '2025-12-02',
+    name: "Andhika",
+    phone: "-",
+    email: "-",
+    group: "Veridface Company",
+    createTime: "2025-12-02",
     hasCredential: true,
   },
   {
     id: 2,
-    name: 'Naz',
-    phone: '-',
-    email: 'naz@gmail.com',
-    group: 'Veridface Company',
-    createTime: '2025-09-15',
+    name: "Naz",
+    phone: "-",
+    email: "naz@gmail.com",
+    group: "Veridface Company",
+    createTime: "2025-09-15",
     hasCredential: true,
   },
   {
     id: 3,
-    name: 'Iswa',
-    phone: '-',
-    email: 'vin@gmail.com',
-    group: 'Veridface Company',
-    createTime: '2025-09-15',
+    name: "Iswa",
+    phone: "-",
+    email: "vin@gmail.com",
+    group: "Veridface Company",
+    createTime: "2025-09-15",
     hasCredential: true,
   },
   {
     id: 4,
-    name: 'Kiayi Khalis',
-    phone: '-',
-    email: 'khalis@gmail.com',
-    group: 'Veridface Company',
-    createTime: '2025-09-15',
+    name: "Kiayi Khalis",
+    phone: "-",
+    email: "khalis@gmail.com",
+    group: "Veridface Company",
+    createTime: "2025-09-15",
     hasCredential: true,
   },
 ];
@@ -47,11 +57,11 @@ const userData = [
 const UserPage = () => {
   // ========== STATE ==========
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState('Veridface Company');
+  const [selectedCompany, setSelectedCompany] = useState("Veridface Company");
   const [filters, setFilters] = useState({
-    name: '',
-    phone: '',
-    email: '',
+    name: "",
+    phone: "",
+    email: "",
   });
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -60,34 +70,91 @@ const UserPage = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCredentialModalOpen, setIsCredentialModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('face');
+  const [activeTab, setActiveTab] = useState("face");
   const [importFiles, setImportFiles] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
-    username: '',
-    phone: '',
-    email: '',
-    password: '',
-    group: '',
+    name: "",
+    phone: "",
+    email: "",
+    group: "",
     admin: false,
-    permission: '',
-    note: '',
+    permission: "",
+    note: "",
   });
   const [credentialData, setCredentialData] = useState({
     faceImage: null,
-    cardId: '',
-    userPassword: '',
+    cardId: "",
+    userPassword: "",
     qrCode: null,
   });
 
+  const [dataUser, setDataUser] = useState([]);
+  const [filteredUser, setFilteredUser] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [isDeleteUser, setIsDeleteUser] = useState(false);
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    setFilteredUser(dataUser);
+  }, [dataUser]);
+
+  const api = "http://localhost:3000/";
+
+  const getUser = async () => {
+    try {
+      const res = await axios.get(`${api}user/userdata`);
+      console.log("resss", res.data.data);
+      setDataUser(res.data.data);
+    } catch (error) {
+      console.log("Errorrrr ====", error);
+    }
+  };
+
   // ========== EVENT HANDLERS ==========
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleSearch = () => {
+    const { name, phone, email } = filters;
+
+    const filtered = dataUser.filter((user) => {
+      const matchName =
+        !name || user.name?.toLowerCase().includes(name.toLowerCase());
+
+      const matchPhone =
+        !phone || user.phone?.toLowerCase().includes(phone.toLowerCase());
+
+      const matchEmail =
+        !email || user.email?.toLowerCase().includes(email.toLowerCase());
+
+      return matchName && matchPhone && matchEmail;
+    });
+
+    setFilteredUser(filtered);
+  };
+
+  const handleResetFilter = () => {
+    setFilters({
+      name: "",
+      phone: "",
+      email: "",
+    });
+
+    setFilteredUser(dataUser);
   };
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedUsers(userData.map(user => user.id));
+      setSelectedUsers(userData.map((user) => user.id));
     } else {
       setSelectedUsers([]);
     }
@@ -95,28 +162,28 @@ const UserPage = () => {
 
   const handleSelectUser = (userId) => {
     if (selectedUsers.includes(userId)) {
-      setSelectedUsers(selectedUsers.filter(id => id !== userId));
+      setSelectedUsers(selectedUsers.filter((id) => id !== userId));
     } else {
       setSelectedUsers([...selectedUsers, userId]);
     }
   };
 
   const handleFormChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   // Edit Modal Handlers
   const handleEditClick = (user) => {
     setEditingUser(user);
     setFormData({
-      username: user.name,
-      phone: user.phone,
-      email: user.email,
-      password: '123456',
-      group: user.group,
-      admin: false,
-      permission: '',
-      note: '',
+      username: user.name || "",
+      phone: user.phone || "",
+      email: user.email || "",
+      password: "123456",
+      group: user.group || "Veridface Company",
+      admin: user.isadmin === 1 ? 1 : 0,
+      permission: "",
+      note: user.note || "",
     });
     setIsEditModalOpen(true);
   };
@@ -127,21 +194,22 @@ const UserPage = () => {
   };
 
   const handleConfirm = () => {
-    console.log('Saving user data:', formData);
+    console.log("Saving user data:", formData);
     handleCloseModal();
+    // Reload
+    getUser();
   };
 
   // Add Personnel Modal Handlers
   const handleAddPersonnelClick = () => {
     setFormData({
-      username: '',
-      phone: '',
-      email: '',
-      password: '123456',
-      group: 'Veridface Company',
+      username: "",
+      phone: "",
+      email: "",
+      password: "123456",
+      group: "Veridface Company",
       admin: false,
-      permission: '',
-      note: '',
+      note: "",
     });
     setIsAddModalOpen(true);
   };
@@ -150,9 +218,43 @@ const UserPage = () => {
     setIsAddModalOpen(false);
   };
 
-  const handleAddConfirm = () => {
-    console.log('Adding new personnel:', formData);
-    handleCloseAddModal();
+  //add user
+  const handleAddConfirm = async () => {
+    const addUserPayload = {
+      username: formData.username,
+      phone: formData.phone,
+      email: formData.email,
+      group_name: formData.group,
+      isadmin: formData.admin ? 1 : 0,
+      note: formData.note || "",
+    };
+    console.log("payload add ===", addUserPayload);
+
+    setIsLoading(true);
+    try {
+      console.log("Sending add user payload:", addUserPayload);
+
+      const res = await axios.post(
+        `${api}user/userdata/adduser`,
+        addUserPayload
+      );
+
+      console.log("User berhasil ditambahkan:", res.data);
+      setToast({ message: "User berhasil ditambahkan!", type: "success" });
+
+      handleCloseAddModal();
+      getUser();
+    } catch (error) {
+      console.error("Error adding user:", error);
+      setToast({
+        message:
+          "Gagal menambahkan user: " +
+          (error.response?.data?.message || error.message),
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Import Modal Handlers
@@ -178,7 +280,7 @@ const UserPage = () => {
   };
 
   const handleImportConfirm = () => {
-    console.log('Importing files:', importFiles);
+    console.log("Importing files:", importFiles);
     handleCloseImportModal();
   };
 
@@ -192,7 +294,7 @@ const UserPage = () => {
   };
 
   const handleExportConfirm = () => {
-    console.log('Exporting user data...');
+    console.log("Exporting user data...");
     // Logic untuk export data ke CSV/Excel
     handleCloseExportModal();
   };
@@ -200,7 +302,7 @@ const UserPage = () => {
   // Delete Modal Handlers
   const handleDeleteClick = () => {
     if (selectedUsers.length === 0) {
-      alert('Please select users to delete');
+      alert("Please select users to delete");
       return;
     }
     setIsDeleteModalOpen(true);
@@ -210,21 +312,39 @@ const UserPage = () => {
     setIsDeleteModalOpen(false);
   };
 
-  const handleDeleteConfirm = () => {
-    console.log('Deleting users:', selectedUsers);
-    // Logic untuk delete selected users
-    setSelectedUsers([]);
-    handleCloseDeleteModal();
+  const handleDeleteConfirm = async () => {
+    console.log("selectedUsers:", selectedUsers);
+
+    setIsDeleteUser(true);
+    try {
+      await Promise.all(
+        selectedUsers.map((id) =>
+          axios.post(`${api}user/userdata/delete`, { id })
+        )
+      );
+
+      setSelectedUsers([]);
+      handleCloseDeleteModal();
+      getUser?.(); // refresh data
+    } catch (error) {
+      console.error("Error deleting users:", error);
+      alert(
+        "Gagal menghapus data: " +
+          (error.response?.data?.message || error.message)
+      );
+    } finally {
+      setIsDeleteUser(false);
+    }
   };
 
   // Credential Modal Handlers
   const handleCredentialClick = (user) => {
     setEditingUser(user);
-    setActiveTab('face');
+    setActiveTab("face");
     setCredentialData({
       faceImage: null,
-      cardId: '',
-      userPassword: '',
+      cardId: "",
+      userPassword: "",
       qrCode: null,
     });
     setIsCredentialModalOpen(true);
@@ -233,20 +353,30 @@ const UserPage = () => {
   const handleCloseCredentialModal = () => {
     setIsCredentialModalOpen(false);
     setEditingUser(null);
-    setActiveTab('face');
+    setActiveTab("face");
   };
 
   const handleFileUpload = (type, file) => {
-    setCredentialData(prev => ({ ...prev, [type]: file }));
+    setCredentialData((prev) => ({ ...prev, [type]: file }));
   };
 
   const handleCredentialChange = (field, value) => {
-    setCredentialData(prev => ({ ...prev, [field]: value }));
+    setCredentialData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleCredentialConfirm = () => {
-    console.log('Saving credential data:', credentialData);
+    console.log("Saving credential data:", credentialData);
     handleCloseCredentialModal();
+  };
+
+  const dateFormat = (isoDate) => {
+    const date = new Date(isoDate);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   };
 
   // ========== RENDER ==========
@@ -254,10 +384,14 @@ const UserPage = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      
-      <div className={`flex-1 ${isCollapsed ? 'ml-20' : 'ml-64'} flex flex-col overflow-hidden transition-all duration-300`}>
+
+      <div
+        className={`flex-1 ${
+          isCollapsed ? "ml-20" : "ml-64"
+        } flex flex-col overflow-hidden transition-all duration-300`}
+      >
         <Header />
-        
+
         <main className="flex-1 overflow-y-auto p-8">
           {/* Filters */}
           <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
@@ -270,7 +404,7 @@ const UserPage = () => {
                   type="text"
                   placeholder="Please enter"
                   value={filters.name}
-                  onChange={(e) => handleFilterChange('name', e.target.value)}
+                  onChange={(e) => handleFilterChange("name", e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -282,7 +416,7 @@ const UserPage = () => {
                   type="text"
                   placeholder="Please enter"
                   value={filters.phone}
-                  onChange={(e) => handleFilterChange('phone', e.target.value)}
+                  onChange={(e) => handleFilterChange("phone", e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -294,17 +428,24 @@ const UserPage = () => {
                   type="text"
                   placeholder="Please enter"
                   value={filters.email}
-                  onChange={(e) => handleFilterChange('email', e.target.value)}
+                  onChange={(e) => handleFilterChange("email", e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             <div className="flex gap-3 justify-end">
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2">
+              <button
+                onClick={handleSearch}
+                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
+              >
                 <span>🔍</span>
                 Search
               </button>
-              <button className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2">
+
+              <button
+                onClick={handleResetFilter}
+                className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+              >
                 <RotateCcw size={16} />
                 Reset
               </button>
@@ -313,25 +454,25 @@ const UserPage = () => {
 
           {/* Action Buttons */}
           <div className="mb-6 flex flex-wrap gap-3">
-            <button 
+            <button
               onClick={handleAddPersonnelClick}
               className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium border border-green-200"
             >
-              + Add New 
+              + Add New
             </button>
-            <button 
+            {/* <button
               onClick={handleImportClick}
               className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
             >
               Import Data
-            </button>
-            <button 
+            </button> */}
+            <button
               onClick={handleExportClick}
               className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
             >
               Export Data
             </button>
-            <button 
+            <button
               onClick={handleDeleteClick}
               className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200"
             >
@@ -353,18 +494,35 @@ const UserPage = () => {
                         className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
                       />
                     </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">Name</th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">Phone</th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">Email</th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">Group</th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">Create time</th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">Credential</th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">Operation</th>
+                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                      Name
+                    </th>
+                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                      Phone
+                    </th>
+                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                      Email
+                    </th>
+                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                      Group
+                    </th>
+                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                      Create time
+                    </th>
+                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                      Credential
+                    </th>
+                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                      Operation
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {userData.map((user) => (
-                    <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  {filteredUser?.map((user) => (
+                    <tr
+                      key={user.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
                       <td className="py-4 px-6">
                         <input
                           type="checkbox"
@@ -376,8 +534,12 @@ const UserPage = () => {
                       <td className="py-4 px-6 text-gray-700">{user.name}</td>
                       <td className="py-4 px-6 text-gray-500">{user.phone}</td>
                       <td className="py-4 px-6 text-gray-700">{user.email}</td>
-                      <td className="py-4 px-6 text-gray-700">{user.group}</td>
-                      <td className="py-4 px-6 text-gray-700">{user.createTime}</td>
+                      <td className="py-4 px-6 text-gray-700">
+                        {user.group_name}
+                      </td>
+                      <td className="py-4 px-6 text-gray-700">
+                        {dateFormat(user.created_at)}
+                      </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
                           <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
@@ -390,13 +552,13 @@ const UserPage = () => {
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex flex-col gap-1">
-                          <button 
+                          <button
                             onClick={() => handleEditClick(user)}
                             className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
                           >
                             Edit
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleCredentialClick(user)}
                             className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
                           >
@@ -419,6 +581,8 @@ const UserPage = () => {
           formData={formData}
           onFormChange={handleFormChange}
           onConfirm={handleConfirm}
+          editingUser={editingUser}
+          onError={(msg) => setToast({ message: msg, type: "error" })}
         />
 
         <AddPersonnelModal
@@ -427,6 +591,7 @@ const UserPage = () => {
           formData={formData}
           onFormChange={handleFormChange}
           onConfirm={handleAddConfirm}
+          isLoading={isLoading}
         />
 
         <ImportModal
@@ -449,6 +614,7 @@ const UserPage = () => {
           onClose={handleCloseDeleteModal}
           onConfirm={handleDeleteConfirm}
           selectedCount={selectedUsers.length}
+          isLoading={isDeleteUser}
         />
 
         <CredentialModal
@@ -462,6 +628,14 @@ const UserPage = () => {
           onConfirm={handleCredentialConfirm}
         />
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };
