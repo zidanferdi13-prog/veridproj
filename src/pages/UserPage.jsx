@@ -10,7 +10,6 @@ import {
 } from "@components/features/user";
 import { Toast } from "@components/common/Toast";
 import { RotateCcw, Eye, CreditCard } from "lucide-react";
-import { getDataUser } from "../utils/user";
 import axios from "axios";
 
 // ==================== DATA ====================
