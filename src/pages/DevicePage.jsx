@@ -10,7 +10,14 @@ import {
 } from "@components/features/device";
 import { useModal, useFilters, useSelection, useFormData } from "@hooks";
 import { RotateCcw, X } from "lucide-react";
-import { addDevice, deleteDevice, getDevices } from "../utils/api/device";
+import {
+  addDevice,
+  configNetwork,
+  deleteDevice,
+  editDevice,
+  getDevices,
+  remoteUnlock,
+} from "../utils/api/device";
 
 const DevicePage = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -198,13 +205,45 @@ const DevicePage = () => {
   };
 
   const handleConfigurationClick = (device) => {
+    setSelectedDevice(device);
     resetConfigForm();
     configModal.open();
   };
 
-  const handleConfigConfirm = () => {
-    console.log("Configuration data:", configData);
-    configModal.close();
+  const handleConfigConfirm = async () => {
+    try {
+      if (!selectedDevice?.id) {
+        alert("Device tidak ditemukan");
+        return;
+      }
+
+      const payload = {
+        id_device: selectedDevice.id,
+
+        ip_state: configData.ipType,
+        ip_address:
+          configData.ipType === "static" ? configData.ipAddress : null,
+        ip_subnet_mask:
+          configData.ipType === "static" ? configData.subnetMask : null,
+        ip_gateway: configData.ipType === "static" ? configData.gateway : null,
+        ip_dns1: configData.ipType === "static" ? configData.dns : null,
+
+        netrowk_mode: configData.networkType,
+        wifi_ssid:
+          configData.networkType === "wifi" ? configData.wifiName : null,
+        wifi_password:
+          configData.networkType === "wifi" ? configData.wifiPassword : null,
+      };
+      console.log("payload config", payload);
+
+      await configNetwork(payload);
+
+      alert("Konfigurasi berhasil disimpan ✅");
+      configModal.close();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal menyimpan konfigurasi");
+    }
   };
 
   const handleGenConfigCode = () => {
@@ -217,9 +256,29 @@ const DevicePage = () => {
     remoteUnlockModal.open();
   };
 
-  const handleRemoteUnlockConfirm = () => {
-    console.log("Remote unlock confirmed for:", selectedDevice);
-    alert(`Remote unlock successful for ${selectedDevice.device}!`);
+  const handleRemoteUnlockConfirm = async () => {
+    try {
+      if (!selectedDevice?.id) {
+        alert("Device tidak ditemukan");
+        return;
+      }
+
+      //belom pasti
+      const payload = {
+        id_device: selectedDevice.id,
+        remote_command: "UNLOCK",
+      };
+
+      console.log("payload unlock", payload);
+
+      await remoteUnlock(payload);
+
+      alert(`Remote unlock berhasil untuk ${selectedDevice.device}`);
+      remoteUnlockModal.close();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal melakukan remote unlock");
+    }
   };
 
   const handleEditClick = (device) => {
@@ -234,10 +293,41 @@ const DevicePage = () => {
     editModal.open();
   };
 
-  const handleEditConfirm = () => {
-    console.log("Editing device:", editFormData);
-    alert(`Device ${editFormData.device} updated successfully!`);
-    editModal.close();
+  const handleEditConfirm = async () => {
+    try {
+      if (!selectedDevice?.id) {
+        alert("Device tidak ditemukan");
+        return;
+      }
+
+      if (!editFormData.sn || !editFormData.model || !editFormData.device) {
+        alert("SN, Model, dan Device wajib diisi");
+        return;
+      }
+
+      const payload = {
+        id_device: selectedDevice.id,
+        device_sn: editFormData.sn,
+        device_model: editFormData.model,
+        device_name: editFormData.device,
+        device_group: editFormData.groups,
+        device_note: editFormData.note,
+        device_location: null,
+      };
+
+      console.log("payload edit", payload);
+
+      await editDevice(payload);
+
+      alert("Device berhasil diperbarui ✅");
+
+      editModal.close();
+      resetEditForm();
+      fetchDevices();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal update device");
+    }
   };
 
   const handlePermissionQueryClick = (device) => {

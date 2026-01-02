@@ -91,7 +91,7 @@ const EditDeviceModal = ({ isOpen, onClose, onConfirm, formData, onFormChange })
             </label>
             <textarea
               placeholder="Please enter"
-              value={formData.note}
+              value={formData.device_note}
               onChange={(e) => onFormChange('note', e.target.value)}
               rows={4}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-900 placeholder-gray-400 resize-none"

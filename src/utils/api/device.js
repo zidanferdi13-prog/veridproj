@@ -13,3 +13,16 @@ export const deleteDevice = async (id_device) => {
     id_device,
   });
 };
+
+//edit device
+export const editDevice = async (data) => {
+  return axios.post(`${url}/devicedata/configDevice`, data);
+};
+
+export const configNetwork = async (data) => {
+  return axios.post(`${url}/devicedata/configNetwork`, data);
+};
+
+export const remoteUnlock = async (data) => {
+  return axios.post(`${url}/devicedata/remote`, data);
+};
