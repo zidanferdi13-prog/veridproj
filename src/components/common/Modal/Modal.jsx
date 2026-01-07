@@ -36,21 +36,26 @@ export const ModalFooter = ({
   confirmText = 'Confirm',
   cancelIcon,
   confirmIcon,
+  isLoading = false,
   confirmClassName = 'bg-cyan-500 hover:bg-cyan-600'
 }) => (
   <>
     <button
       onClick={onCancel}
-      className="px-8 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+      disabled={isLoading}
+      className="px-8 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {cancelIcon}
       {cancelText}
     </button>
     <button
       onClick={onConfirm}
-      className={`px-8 py-2 text-white rounded-lg transition-colors font-medium flex items-center gap-2 ${confirmClassName}`}
+      disabled={isLoading}
+      className={`px-8 py-2 text-white rounded-lg transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${confirmClassName}`}
     >
-      {confirmIcon}
+      {isLoading && (
+        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+      )}
       {confirmText}
     </button>
   </>

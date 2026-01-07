@@ -1,40 +1,48 @@
-import React, { useState } from 'react';
-import { Sidebar, Header } from '@components';
-import { AddDeviceModal, ConfigurationModal, DeleteConfirmModal, RemoteUnlockModal, EditDeviceModal, PermissionQueryModal } from '@components/features/device';
-import { useModal, useFilters, useSelection, useFormData } from '@hooks';
-import { RotateCcw, X } from 'lucide-react';
-
-const deviceData = [
-  {
-    id: 1,
-    device: 'Veridface',
-    sn: 'J257280001',
-    model: 'VF104',
-    type: 'Access Control',
-    groups: 'Ungrouped',
-    onOff: true,
-    status: 'Offline',
-    createTime: '2025-09-29 17:08:06',
-  },
-];
+import React, { useEffect, useState } from "react";
+import { Sidebar, Header } from "@components";
+import {
+  AddDeviceModal,
+  ConfigurationModal,
+  DeleteConfirmModal,
+  RemoteUnlockModal,
+  EditDeviceModal,
+  PermissionQueryModal,
+} from "@components/features/device";
+import { useModal, useFilters, useSelection, useFormData } from "@hooks";
+import { RotateCcw, X } from "lucide-react";
+import {
+  addDevice,
+  configNetwork,
+  deleteDevice,
+  editDevice,
+  getDevices,
+  remoteUnlock,
+} from "../utils/api/device";
 
 const DevicePage = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState('All');
-  
+  const [selectedGroup, setSelectedGroup] = useState("All");
+  const [deviceData, setDeviceData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   // Use custom hooks
   const { filters, handleFilterChange, resetFilters } = useFilters({
-    device: '',
-    model: '',
-    onOff: '',
-    status: '',
-    sn: '',
-    startDate: '',
-    endDate: '',
+    device: "",
+    model: "",
+    onOff: "",
+    status: "",
+    sn: "",
+    startDate: "",
+    endDate: "",
   });
-  
-  const { selectedItems: selectedDevices, toggleSelectAll, toggleItem, setSelectedItems } = useSelection();
-  
+
+  const {
+    selectedItems: selectedDevices,
+    toggleSelectAll,
+    toggleItem,
+    setSelectedItems,
+  } = useSelection();
+
   const addModal = useModal();
   const configModal = useModal();
   const deleteModal = useModal();
@@ -42,33 +50,76 @@ const DevicePage = () => {
   const editModal = useModal();
   const permissionQueryModal = useModal();
   const [selectedDevice, setSelectedDevice] = useState(null);
-  
-  const { formData: deviceFormData, handleChange: handleDeviceFormChange, resetForm: resetDeviceForm, setForm: setDeviceForm } = useFormData({
-    sn: '',
-    model: '',
-    device: '',
-    groups: '',
-    note: '',
+
+  const {
+    formData: deviceFormData,
+    handleChange: handleDeviceFormChange,
+    resetForm: resetDeviceForm,
+    setForm: setDeviceForm,
+  } = useFormData({
+    sn: "",
+    model: "",
+    device: "",
+    groups: "",
+    note: "",
   });
 
-  const { formData: editFormData, handleChange: handleEditFormChange, resetForm: resetEditForm, setForm: setEditForm } = useFormData({
-    sn: '',
-    model: '',
-    device: '',
-    groups: '',
-    note: '',
+  const {
+    formData: editFormData,
+    handleChange: handleEditFormChange,
+    resetForm: resetEditForm,
+    setForm: setEditForm,
+  } = useFormData({
+    sn: "",
+    model: "",
+    device: "",
+    groups: "",
+    note: "",
   });
-  
-  const { formData: configData, handleChange: handleConfigChange, resetForm: resetConfigForm } = useFormData({
-    ipType: 'dynamic',
-    ipAddress: '',
-    subnetMask: '',
-    gateway: '',
-    dns: '',
-    networkType: 'ethernet',
-    wifiName: '',
-    wifiPassword: '',
+
+  const {
+    formData: configData,
+    handleChange: handleConfigChange,
+    resetForm: resetConfigForm,
+  } = useFormData({
+    ipType: "dynamic",
+    ipAddress: "",
+    subnetMask: "",
+    gateway: "",
+    dns: "",
+    networkType: "ethernet",
+    wifiName: "",
+    wifiPassword: "",
   });
+
+  useEffect(() => {
+    fetchDevices();
+  }, []);
+  const fetchDevices = async () => {
+    try {
+      setLoading(true);
+      const res = await getDevices();
+      console.log("data device", res);
+
+      setDeviceData(
+        res.data.data.map((item) => ({
+          id: item.id_device,
+          device: item.device_name,
+          sn: item.device_sn,
+          model: item.device_model,
+          type: "Access Control",
+          groups: item.device_group || "-",
+          onOff: true,
+          status: "Offline",
+          createTime: item.created_at || "-",
+        }))
+      );
+    } catch (error) {
+      console.error("Fetch device error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSelectAll = (e) => {
     toggleSelectAll(e, deviceData);
@@ -80,16 +131,34 @@ const DevicePage = () => {
 
   const handleDelete = () => {
     if (selectedDevices.length === 0) {
-      alert('Please select devices to delete');
+      alert("Please select devices to delete");
       return;
     }
     deleteModal.open();
   };
 
-  const handleDeleteConfirm = () => {
-    console.log('Deleting devices:', selectedDevices);
-    setSelectedItems([]);
-    deleteModal.close();
+  const handleDeleteConfirm = async () => {
+    try {
+      if (selectedDevices.length === 0) {
+        alert("Pilih device terlebih dahulu");
+        return;
+      }
+
+      for (const id of selectedDevices) {
+        await deleteDevice(id);
+      }
+
+      alert("Device berhasil dihapus");
+
+      setSelectedItems([]);
+      deleteModal.close();
+
+      // refresh data
+      fetchDevices();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal menghapus device");
+    }
   };
 
   const handleAddDevice = () => {
@@ -97,24 +166,89 @@ const DevicePage = () => {
     addModal.open();
   };
 
-  const handleAddConfirm = () => {
-    console.log('Adding device:', deviceFormData);
-    addModal.close();
+  //hit api tambah data device disini
+  const handleAddConfirm = async () => {
+    try {
+      if (
+        !deviceFormData.sn ||
+        !deviceFormData.model ||
+        !deviceFormData.device
+      ) {
+        alert("SN, Model, dan Device wajib diisi");
+        return;
+      }
+
+      const payload = {
+        device_sn: deviceFormData.sn,
+        device_model: deviceFormData.model,
+        device_name: deviceFormData.device,
+        device_group: deviceFormData.groups || null,
+        device_note: deviceFormData.note || null,
+        device_location: null,
+      };
+
+      console.log("datanya device", payload);
+
+      const res = await addDevice(payload);
+
+      alert("Device berhasil ditambahkan ✅");
+
+      console.log("Response:", res.data);
+
+      addModal.close();
+      resetDeviceForm();
+      fetchDevices();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal menambahkan device");
+    }
   };
 
   const handleConfigurationClick = (device) => {
+    setSelectedDevice(device);
     resetConfigForm();
     configModal.open();
   };
 
-  const handleConfigConfirm = () => {
-    console.log('Configuration data:', configData);
-    configModal.close();
+  const handleConfigConfirm = async () => {
+    try {
+      if (!selectedDevice?.id) {
+        alert("Device tidak ditemukan");
+        return;
+      }
+
+      const payload = {
+        id_device: selectedDevice.id,
+
+        ip_state: configData.ipType,
+        ip_address:
+          configData.ipType === "static" ? configData.ipAddress : null,
+        ip_subnet_mask:
+          configData.ipType === "static" ? configData.subnetMask : null,
+        ip_gateway: configData.ipType === "static" ? configData.gateway : null,
+        ip_dns1: configData.ipType === "static" ? configData.dns : null,
+
+        netrowk_mode: configData.networkType,
+        wifi_ssid:
+          configData.networkType === "wifi" ? configData.wifiName : null,
+        wifi_password:
+          configData.networkType === "wifi" ? configData.wifiPassword : null,
+      };
+      console.log("payload config", payload);
+
+      await configNetwork(payload);
+
+      alert("Konfigurasi berhasil disimpan ✅");
+      configModal.close();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal menyimpan konfigurasi");
+    }
   };
 
   const handleGenConfigCode = () => {
-    console.log('Generating config code with:', configData);
-    alert('Config code generated!');
+    console.log("Generating config code with:", configData);
+    alert("Config code generated!");
   };
 
   const handleRemoteUnlockClick = (device) => {
@@ -122,9 +256,29 @@ const DevicePage = () => {
     remoteUnlockModal.open();
   };
 
-  const handleRemoteUnlockConfirm = () => {
-    console.log('Remote unlock confirmed for:', selectedDevice);
-    alert(`Remote unlock successful for ${selectedDevice.device}!`);
+  const handleRemoteUnlockConfirm = async () => {
+    try {
+      if (!selectedDevice?.id) {
+        alert("Device tidak ditemukan");
+        return;
+      }
+
+      //belom pasti
+      const payload = {
+        id_device: selectedDevice.id,
+        remote_command: "UNLOCK",
+      };
+
+      console.log("payload unlock", payload);
+
+      await remoteUnlock(payload);
+
+      alert(`Remote unlock berhasil untuk ${selectedDevice.device}`);
+      remoteUnlockModal.close();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal melakukan remote unlock");
+    }
   };
 
   const handleEditClick = (device) => {
@@ -134,15 +288,46 @@ const DevicePage = () => {
       model: device.model,
       device: device.device,
       groups: device.groups,
-      note: device.note || '',
+      note: device.note || "",
     });
     editModal.open();
   };
 
-  const handleEditConfirm = () => {
-    console.log('Editing device:', editFormData);
-    alert(`Device ${editFormData.device} updated successfully!`);
-    editModal.close();
+  const handleEditConfirm = async () => {
+    try {
+      if (!selectedDevice?.id) {
+        alert("Device tidak ditemukan");
+        return;
+      }
+
+      if (!editFormData.sn || !editFormData.model || !editFormData.device) {
+        alert("SN, Model, dan Device wajib diisi");
+        return;
+      }
+
+      const payload = {
+        id_device: selectedDevice.id,
+        device_sn: editFormData.sn,
+        device_model: editFormData.model,
+        device_name: editFormData.device,
+        device_group: editFormData.groups,
+        device_note: editFormData.note,
+        device_location: null,
+      };
+
+      console.log("payload edit", payload);
+
+      await editDevice(payload);
+
+      alert("Device berhasil diperbarui ✅");
+
+      editModal.close();
+      resetEditForm();
+      fetchDevices();
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Gagal update device");
+    }
   };
 
   const handlePermissionQueryClick = (device) => {
@@ -153,10 +338,14 @@ const DevicePage = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      
-      <div className={`flex-1 ${isCollapsed ? 'ml-20' : 'ml-64'} flex flex-col overflow-hidden transition-all duration-300`}>
+
+      <div
+        className={`flex-1 ${
+          isCollapsed ? "ml-20" : "ml-64"
+        } flex flex-col overflow-hidden transition-all duration-300`}
+      >
         <Header />
-        
+
         <main className="flex-1 overflow-y-auto p-8">
           <div className="flex gap-6">
             {/* Main Content */}
@@ -172,7 +361,9 @@ const DevicePage = () => {
                       type="text"
                       placeholder="Please enter"
                       value={filters.device}
-                      onChange={(e) => handleFilterChange('device', e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("device", e.target.value)
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -184,7 +375,9 @@ const DevicePage = () => {
                       type="text"
                       placeholder="Please enter"
                       value={filters.model}
-                      onChange={(e) => handleFilterChange('model', e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("model", e.target.value)
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -194,7 +387,9 @@ const DevicePage = () => {
                     </label>
                     <select
                       value={filters.onOff}
-                      onChange={(e) => handleFilterChange('onOff', e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("onOff", e.target.value)
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Please select</option>
@@ -208,7 +403,9 @@ const DevicePage = () => {
                     </label>
                     <select
                       value={filters.status}
-                      onChange={(e) => handleFilterChange('status', e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("status", e.target.value)
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Please select</option>
@@ -224,7 +421,7 @@ const DevicePage = () => {
                       type="text"
                       placeholder="Please enter"
                       value={filters.sn}
-                      onChange={(e) => handleFilterChange('sn', e.target.value)}
+                      onChange={(e) => handleFilterChange("sn", e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -234,7 +431,7 @@ const DevicePage = () => {
                     <span>🔍</span>
                     Search
                   </button>
-                  <button 
+                  <button
                     onClick={resetFilters}
                     className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
                   >
@@ -246,13 +443,13 @@ const DevicePage = () => {
 
               {/* Action Buttons */}
               <div className="mb-6 flex flex-wrap gap-3">
-                <button 
+                <button
                   onClick={handleAddDevice}
                   className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium border border-green-200"
                 >
                   + Add device
                 </button>
-                <button 
+                <button
                   onClick={handleDelete}
                   className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200"
                 >
@@ -270,24 +467,48 @@ const DevicePage = () => {
                           <input
                             type="checkbox"
                             onChange={handleSelectAll}
-                            checked={selectedDevices.length === deviceData.length && deviceData.length > 0}
+                            checked={
+                              selectedDevices.length === deviceData.length &&
+                              deviceData.length > 0
+                            }
                             className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
                           />
                         </th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">Device</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">SN</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">Model</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">Type</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">Groups</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">On/Off</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">Create Time</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">Status</th>
-                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">Operation</th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          Device
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          SN
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          Model
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          Type
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          Groups
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          On/Off
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          Create Time
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          Status
+                        </th>
+                        <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                          Operation
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {deviceData.map((device) => (
-                        <tr key={device.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      {deviceData?.map((device) => (
+                        <tr
+                          key={device.id}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        >
                           <td className="py-4 px-6">
                             <input
                               type="checkbox"
@@ -296,11 +517,21 @@ const DevicePage = () => {
                               className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
                             />
                           </td>
-                          <td className="py-4 px-6 text-gray-700">{device.device}</td>
-                          <td className="py-4 px-6 text-gray-700">{device.sn}</td>
-                          <td className="py-4 px-6 text-gray-700">{device.model}</td>
-                          <td className="py-4 px-6 text-gray-700">{device.type}</td>
-                          <td className="py-4 px-6 text-gray-700">{device.groups}</td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {device.device}
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {device.sn}
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {device.model}
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {device.type}
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {device.groups}
+                          </td>
                           <td className="py-4 px-6">
                             <label className="relative inline-flex items-center cursor-pointer">
                               <input
@@ -312,38 +543,44 @@ const DevicePage = () => {
                               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                             </label>
                           </td>
-                          <td className="py-4 px-6 text-gray-700">{device.createTime}</td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {device.createTime}
+                          </td>
                           <td className="py-4 px-6">
-                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              device.status === 'Offline'
-                                ? 'bg-red-100 text-red-600'
-                                : 'bg-green-100 text-green-600'
-                            }`}>
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                device.status === "Offline"
+                                  ? "bg-red-100 text-red-600"
+                                  : "bg-green-100 text-green-600"
+                              }`}
+                            >
                               {device.status}
                             </span>
                           </td>
                           <td className="py-4 px-6">
                             <div className="flex flex-col gap-1">
-                              <button 
+                              <button
                                 onClick={() => handleConfigurationClick(device)}
                                 className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
                               >
                                 Configuration
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleRemoteUnlockClick(device)}
                                 className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
                               >
                                 Remote Unlock
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleEditClick(device)}
                                 className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
                               >
                                 Edit
                               </button>
-                              <button 
-                                onClick={() => handlePermissionQueryClick(device)}
+                              <button
+                                onClick={() =>
+                                  handlePermissionQueryClick(device)
+                                }
                                 className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
                               >
                                 Permission query
@@ -368,13 +605,19 @@ const DevicePage = () => {
                       <option>100/page</option>
                     </select>
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>
+                      <button
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                        disabled
+                      >
                         &lt;
                       </button>
                       <button className="px-3 py-1 bg-blue-500 text-white rounded-lg">
                         1
                       </button>
-                      <button className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50" disabled>
+                      <button
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        disabled
+                      >
                         &gt;
                       </button>
                     </div>
