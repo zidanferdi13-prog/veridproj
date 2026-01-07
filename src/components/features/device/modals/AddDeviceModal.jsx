@@ -7,7 +7,7 @@ export const AddDeviceModal = ({ isOpen, onClose, formData, onFormChange, onConf
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Tambahkan perangkat"
+      title="Add Device"
       footer={
         <ModalFooter
           onCancel={onClose}
