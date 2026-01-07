@@ -1,8 +1,13 @@
-import React from 'react';
-import { Modal } from '@components/common/Modal';
-import { AlertCircle } from 'lucide-react';
+import React from "react";
+import { Modal } from "@components/common/Modal";
+import { AlertCircle } from "lucide-react";
 
-const RemoteUnlockModal = ({ isOpen, onClose, onConfirm, deviceName = 'Veridface' }) => {
+const RemoteUnlockModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  deviceName = "Veridface",
+}) => {
   return (
     <Modal
       isOpen={isOpen}
@@ -17,15 +22,7 @@ const RemoteUnlockModal = ({ isOpen, onClose, onConfirm, deviceName = 'Veridface
           >
             Membatalkan
           </button>
-          <button
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-            className="px-8 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors font-medium"
-          >
-            OKE
-          </button>
+          <button onClick={onConfirm}>OKE</button>
         </div>
       }
     >
@@ -38,7 +35,9 @@ const RemoteUnlockModal = ({ isOpen, onClose, onConfirm, deviceName = 'Veridface
           </div>
           <div className="flex-1">
             <p className="text-gray-700 text-base leading-relaxed">
-              Konfirmasi apakah perangkat kontrol akses untuk <span className="font-semibold">{deviceName}</span> dapat dibuka dari jarak jauh?
+              Konfirmasi apakah perangkat kontrol akses untuk{" "}
+              <span className="font-semibold">{deviceName}</span> dapat dibuka
+              dari jarak jauh?
             </p>
           </div>
         </div>

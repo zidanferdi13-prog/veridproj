@@ -15,6 +15,7 @@ import {
   configNetwork,
   deleteDevice,
   editDevice,
+  getDevicePermission,
   getDevices,
   remoteUnlock,
 } from "../utils/api/device";
@@ -25,6 +26,7 @@ const DevicePage = () => {
   const [deviceData, setDeviceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [devicePermissions, setDevicePermissions] = useState([]);
+  const [permissionLoading, setPermissionLoading] = useState(false);
 
   // Use custom hooks
   const { filters, handleFilterChange, resetFilters } = useFilters({
@@ -353,13 +355,17 @@ const DevicePage = () => {
 
   const handlePermissionQueryClick = async (device) => {
     setSelectedDevice(device);
+    setPermissionLoading(true);
 
     try {
       const res = await getDevicePermission(device.id);
       setDevicePermissions(res.data.data || []);
       permissionQueryModal.open();
     } catch (error) {
+      console.error(error);
       alert("Gagal mengambil permission device");
+    } finally {
+      setPermissionLoading(false);
     }
   };
 
@@ -712,6 +718,8 @@ const DevicePage = () => {
         <PermissionQueryModal
           isOpen={permissionQueryModal.isOpen}
           onClose={permissionQueryModal.close}
+          permissions={devicePermissions}
+          loading={permissionLoading}
           deviceName={selectedDevice?.device}
         />
       </div>

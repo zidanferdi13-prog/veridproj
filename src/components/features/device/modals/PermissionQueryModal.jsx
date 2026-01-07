@@ -1,28 +1,18 @@
-import React from 'react';
-import { Modal } from '@components/common/Modal';
-import { X } from 'lucide-react';
+import React from "react";
+import { Modal } from "@components/common/Modal";
 
-const personnelData = [
-  { id: 1, name: 'Harry Potter', phone: '-', email: 'harry@gmail.com' },
-  { id: 2, name: 'Strongman Brunei', phone: '-', email: 'strong@gmail.com' },
-  { id: 3, name: 'David Beckham', phone: '-', email: 'yazid@veridface.com' },
-  { id: 4, name: 'Sen TenZ', phone: '-', email: 'tenz@gmail.com' },
-  { id: 5, name: 'David Beckham', phone: '-', email: 'mzidd37@gmail.com' },
-  { id: 6, name: 'Brad Pitt', phone: '-', email: 'brad@gmail.com' },
-  { id: 7, name: 'Scarlett Johanson', phone: '-', email: 'scarlett@gmail.com' },
-  { id: 8, name: 'Kjayi Khalis', phone: '-', email: 'khalis@gmail.com' },
-  { id: 9, name: 'Andhika', phone: '-', email: '-' },
-  { id: 10, name: 'Naz', phone: '-', email: 'naz@gmail.com' },
-  { id: 11, name: 'Bobby of Brunei', phone: '-', email: 'bobby@gmail.com' },
-  { id: 12, name: 'Iswa', phone: '-', email: 'vin@gmail.com' },
-];
-
-const PermissionQueryModal = ({ isOpen, onClose, deviceName = 'Device' }) => {
+const PermissionQueryModal = ({
+  isOpen,
+  onClose,
+  permissions = [],
+  loading = false,
+  deviceName = "Device",
+}) => {
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Lihat izin akses personel"
+      title={`Izin akses personel - ${deviceName}`}
       maxWidth="max-w-3xl"
       maxHeight="max-h-[80vh]"
     >
@@ -31,19 +21,34 @@ const PermissionQueryModal = ({ isOpen, onClose, deviceName = 'Device' }) => {
           <table className="w-full">
             <thead>
               <tr className="border-b-2 border-gray-200">
-                <th className="text-center py-3 px-4 text-gray-700 font-semibold">Name</th>
-                <th className="text-center py-3 px-4 text-gray-700 font-semibold">Phone</th>
-                <th className="text-center py-3 px-4 text-gray-700 font-semibold">Email</th>
+                <th className="py-3 px-4 text-center">Name</th>
+                <th className="py-3 px-4 text-center">Phone</th>
+                <th className="py-3 px-4 text-center">Email</th>
               </tr>
             </thead>
+
             <tbody>
-              {personnelData.map((person) => (
-                <tr key={person.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-3 px-4 text-center text-gray-700">{person.name}</td>
-                  <td className="py-3 px-4 text-center text-gray-700">{person.phone}</td>
-                  <td className="py-3 px-4 text-center text-gray-700">{person.email}</td>
+              {loading ? (
+                <tr>
+                  <td colSpan={3} className="py-6 text-center text-gray-500">
+                    Loading permission data...
+                  </td>
                 </tr>
-              ))}
+              ) : permissions.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="py-6 text-center text-gray-500">
+                    Tidak ada data permission
+                  </td>
+                </tr>
+              ) : (
+                permissions.map((p, i) => (
+                  <tr key={i} className="border-b hover:bg-gray-50 transition">
+                    <td className="py-3 px-4 text-center">{p.name || "-"}</td>
+                    <td className="py-3 px-4 text-center">{p.phone || "-"}</td>
+                    <td className="py-3 px-4 text-center">{p.email || "-"}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
