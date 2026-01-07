@@ -47,7 +47,7 @@ const AddPersonnelModal = ({
           <input
             type="text"
             placeholder="Please enter"
-            value={formData.phone}
+            value={formData.mobile}
             onChange={(e) => onFormChange("phone", e.target.value)}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
           />

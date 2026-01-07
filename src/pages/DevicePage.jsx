@@ -24,6 +24,7 @@ const DevicePage = () => {
   const [selectedGroup, setSelectedGroup] = useState("All");
   const [deviceData, setDeviceData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [devicePermissions, setDevicePermissions] = useState([]);
 
   // Use custom hooks
   const { filters, handleFilterChange, resetFilters } = useFilters({
@@ -107,11 +108,17 @@ const DevicePage = () => {
           device: item.device_name,
           sn: item.device_sn,
           model: item.device_model,
-          type: "Access Control",
+          type: item.device_type || "Access Control",
           groups: item.device_group || "-",
-          onOff: true,
-          status: "Offline",
-          createTime: item.created_at || "-",
+
+          status: item.status === "online" ? "Online" : "Offline",
+          onOff: item.status === "online",
+
+          createTime: item.created_at
+            ? new Date(item.created_at).toLocaleString()
+            : "-",
+
+          raw: item,
         }))
       );
     } catch (error) {
@@ -206,7 +213,20 @@ const DevicePage = () => {
 
   const handleConfigurationClick = (device) => {
     setSelectedDevice(device);
+
+    const d = device.raw;
+
     resetConfigForm();
+    handleConfigChange("ipType", d.ip_state || "dynamic");
+    handleConfigChange("ipAddress", d.ip_address || "");
+    handleConfigChange("subnetMask", d.ip_subnet_mask || "");
+    handleConfigChange("gateway", d.ip_gateway || "");
+    handleConfigChange("dns", d.ip_dns1 || "");
+
+    handleConfigChange("networkType", d.network_mode || "ethernet");
+    handleConfigChange("wifiName", d.wifi_ssid || "");
+    handleConfigChange("wifiPassword", d.wifi_password || "");
+
     configModal.open();
   };
 
@@ -228,12 +248,13 @@ const DevicePage = () => {
         ip_gateway: configData.ipType === "static" ? configData.gateway : null,
         ip_dns1: configData.ipType === "static" ? configData.dns : null,
 
-        netrowk_mode: configData.networkType,
+        network_mode: configData.networkType,
         wifi_ssid:
           configData.networkType === "wifi" ? configData.wifiName : null,
         wifi_password:
           configData.networkType === "wifi" ? configData.wifiPassword : null,
       };
+
       console.log("payload config", payload);
 
       await configNetwork(payload);
@@ -330,9 +351,16 @@ const DevicePage = () => {
     }
   };
 
-  const handlePermissionQueryClick = (device) => {
+  const handlePermissionQueryClick = async (device) => {
     setSelectedDevice(device);
-    permissionQueryModal.open();
+
+    try {
+      const res = await getDevicePermission(device.id);
+      setDevicePermissions(res.data.data || []);
+      permissionQueryModal.open();
+    } catch (error) {
+      alert("Gagal mengambil permission device");
+    }
   };
 
   return (

@@ -26,3 +26,8 @@ export const configNetwork = async (data) => {
 export const remoteUnlock = async (data) => {
   return axios.post(`${url}/devicedata/remote`, data);
 };
+
+
+export const getDevicePermission = async (id_device) => {
+  return axios.post(`${url}/devicedata/permission`, { id_device });
+};

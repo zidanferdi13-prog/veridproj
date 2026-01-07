@@ -13,44 +13,44 @@ import { RotateCcw, Eye, CreditCard } from "lucide-react";
 import axios from "axios";
 
 // ==================== DATA ====================
-const userData = [
-  {
-    id: 1,
-    name: "Andhika",
-    phone: "-",
-    email: "-",
-    group: "Veridface Company",
-    createTime: "2025-12-02",
-    hasCredential: true,
-  },
-  {
-    id: 2,
-    name: "Naz",
-    phone: "-",
-    email: "naz@gmail.com",
-    group: "Veridface Company",
-    createTime: "2025-09-15",
-    hasCredential: true,
-  },
-  {
-    id: 3,
-    name: "Iswa",
-    phone: "-",
-    email: "vin@gmail.com",
-    group: "Veridface Company",
-    createTime: "2025-09-15",
-    hasCredential: true,
-  },
-  {
-    id: 4,
-    name: "Kiayi Khalis",
-    phone: "-",
-    email: "khalis@gmail.com",
-    group: "Veridface Company",
-    createTime: "2025-09-15",
-    hasCredential: true,
-  },
-];
+// const userData = [
+//   {
+//     id: 1,
+//     name: "Andhika",
+//     phone: "-",
+//     email: "-",
+//     group: "Veridface Company",
+//     createTime: "2025-12-02",
+//     hasCredential: true,
+//   },
+//   {
+//     id: 2,
+//     name: "Naz",
+//     phone: "-",
+//     email: "naz@gmail.com",
+//     group: "Veridface Company",
+//     createTime: "2025-09-15",
+//     hasCredential: true,
+//   },
+//   {
+//     id: 3,
+//     name: "Iswa",
+//     phone: "-",
+//     email: "vin@gmail.com",
+//     group: "Veridface Company",
+//     createTime: "2025-09-15",
+//     hasCredential: true,
+//   },
+//   {
+//     id: 4,
+//     name: "Kiayi Khalis",
+//     phone: "-",
+//     email: "khalis@gmail.com",
+//     group: "Veridface Company",
+//     createTime: "2025-09-15",
+//     hasCredential: true,
+//   },
+// ];
 
 // ==================== MAIN COMPONENT ====================
 const UserPage = () => {
@@ -130,7 +130,7 @@ const UserPage = () => {
         !name || user.name?.toLowerCase().includes(name.toLowerCase());
 
       const matchPhone =
-        !phone || user.phone?.toLowerCase().includes(phone.toLowerCase());
+        !phone || user.mobile?.toLowerCase().includes(phone.toLowerCase());
 
       const matchEmail =
         !email || user.email?.toLowerCase().includes(email.toLowerCase());
@@ -153,7 +153,7 @@ const UserPage = () => {
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedUsers(userData.map((user) => user.id));
+      setSelectedUsers(dataUser.map((user) => user.id));
     } else {
       setSelectedUsers([]);
     }
@@ -292,10 +292,42 @@ const UserPage = () => {
     setIsExportModalOpen(false);
   };
 
-  const handleExportConfirm = () => {
-    console.log("Exporting user data...");
-    // Logic untuk export data ke CSV/Excel
-    handleCloseExportModal();
+  const handleExportConfirm = async () => {
+    try {
+      const response = await axios.get(`${api}user/userdata/exportuser`, {
+        responseType: "blob", 
+      });
+
+      // Buat file dari response
+      const blob = new Blob([response.data], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+
+      // Trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "users.csv");
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setToast({
+        message: "Export data berhasil",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      setToast({
+        message:
+          "Gagal export data: " +
+          (error.response?.data?.message || error.message),
+        type: "error",
+      });
+    } finally {
+      handleCloseExportModal();
+    }
   };
 
   // Delete Modal Handlers
@@ -338,14 +370,18 @@ const UserPage = () => {
 
   // Credential Modal Handlers
   const handleCredentialClick = (user) => {
+    console.log("USER:", user);
+
     setEditingUser(user);
     setActiveTab("face");
+
     setCredentialData({
-      faceImage: null,
-      cardId: "",
+      faceImage: user.photo_url ?? null,
+      cardId: user.access_card_number ?? "no value",
       userPassword: "",
       qrCode: null,
     });
+
     setIsCredentialModalOpen(true);
   };
 
@@ -363,9 +399,35 @@ const UserPage = () => {
     setCredentialData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleCredentialConfirm = () => {
-    console.log("Saving credential data:", credentialData);
-    handleCloseCredentialModal();
+  const handleCredentialConfirm = async () => {
+    if (!editingUser) return;
+
+    const payload = {
+      id: editingUser.id,
+      idimage: null,
+      idcard: credentialData.cardId || null,
+      password: credentialData.userPassword || null,
+      idcode: null,
+    };
+
+    try {
+      await axios.post(`${api}user/userdata/addauth`, payload);
+
+      setToast({
+        message: "Credential berhasil disimpan",
+        type: "success",
+      });
+
+      handleCloseCredentialModal();
+      getUser(); // refresh data
+    } catch (error) {
+      setToast({
+        message:
+          "Gagal menyimpan credential: " +
+          (error.response?.data?.message || error.message),
+        type: "error",
+      });
+    }
   };
 
   const dateFormat = (isoDate) => {
@@ -489,7 +551,7 @@ const UserPage = () => {
                       <input
                         type="checkbox"
                         onChange={handleSelectAll}
-                        checked={selectedUsers.length === userData.length}
+                        checked={selectedUsers.length === dataUser.length}
                         className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
                       />
                     </th>
@@ -531,7 +593,7 @@ const UserPage = () => {
                         />
                       </td>
                       <td className="py-4 px-6 text-gray-700">{user.name}</td>
-                      <td className="py-4 px-6 text-gray-500">{user.phone}</td>
+                      <td className="py-4 px-6 text-gray-500">{user.mobile}</td>
                       <td className="py-4 px-6 text-gray-700">{user.email}</td>
                       <td className="py-4 px-6 text-gray-700">
                         {user.group_name}
