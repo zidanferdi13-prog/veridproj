@@ -3,6 +3,8 @@ import { Modal, ModalFooter } from '@components/common/Modal';
 import { X, Check } from 'lucide-react';
 
 const EditDeviceModal = ({ isOpen, onClose, onConfirm, formData, onFormChange }) => {
+  console.log("data edit", formData);
+  
   return (
     <Modal
       isOpen={isOpen}
