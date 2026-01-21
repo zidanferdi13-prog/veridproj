@@ -1,68 +1,150 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Sidebar, Header } from '@components';
-import { useLocation } from 'react-router-dom';
-import { AddGroupModal, DeleteConfirmModal, RenameModal, AdjustPersonnelModal, AdjustTimeModal } from '@components/features/permission';
-import { RotateCcw } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Sidebar, Header } from "@components";
+import { useLocation } from "react-router-dom";
+import {
+  AddGroupModal,
+  DeleteConfirmModal,
+  RenameModal,
+  AdjustPersonnelModal,
+  AdjustTimeModal,
+} from "@components/features/permission";
+import { RotateCcw } from "lucide-react";
+import {
+  addPermissionGroup,
+  adjustPersonGroup,
+  deletePermissionGroup,
+  getPermissionGroups,
+  getPersonsByGroup,
+  getVisitorPermissionGroups,
+  renamePermissionGroup,
+} from "../utils/api/permission";
 
-// ==================== DATA ====================
-// Data untuk Personnel Permission (Izin personel)
-const personnelPermissionData = [
-  {
-    id: 1,
-    group: 'Veridface',
-    personnelCount: 12,
-    deviceCount: 1,
-    effectivePeriod: 'Berlaku secara permanen',
-  },
-];
+//dummy data
+// const personnelPermissionData = [
+//   {
+//     id: 1,
+//     group: "Veridface",
+//     personnelCount: 12,
+//     deviceCount: 1,
+//     effectivePeriod: "Berlaku secara permanen",
+//   },
+// ];
 
 // Data untuk Permission (Izin)
-const permissionGroupData = [
-  {
-    id: 1,
-    visitorPermission: 'Grup Veridface',
-    trafficDeviceCount: '-',
-  },
-];
+// const permissionGroupData = [
+//   {
+//     id: 1,
+//     visitorPermission: "Grup Veridface",
+//     trafficDeviceCount: "-",
+//   },
+// ];
 
 // ==================== MAIN COMPONENT ====================
 const PermissionPage = () => {
-  // ========== STATE ==========
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState(location?.state?.initialTab || 'personnel'); // 'personnel' or 'permission'
+  const [activeTab, setActiveTab] = useState(
+    location?.state?.initialTab || "personnel"
+  ); // 'personnel' or 'permission'
   const [selectedItems, setSelectedItems] = useState([]);
-  
+  const [selectedPersonnelIds, setSelectedPersonnelIds] = useState([]);
+  const [selectedVisitorIds, setSelectedVisitorIds] = useState([]);
+  const selectedIds =
+    activeTab === "personnel" ? selectedPersonnelIds : selectedVisitorIds;
+
   // Modal states
   const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [groupName, setGroupName] = useState('');
+  const [groupName, setGroupName] = useState("");
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [isAdjustPersonnelModalOpen, setIsAdjustPersonnelModalOpen] = useState(false);
+  const [isAdjustPersonnelModalOpen, setIsAdjustPersonnelModalOpen] =
+    useState(false);
   const [isAdjustTimeModalOpen, setIsAdjustTimeModalOpen] = useState(false);
   const [activeRowItem, setActiveRowItem] = useState(null);
-  
+  const [personnelData, setPersonnelData] = useState([]);
+  const [personnelDataAll, setPersonnelDataAll] = useState([]);
+
+  const [loadingPersonnel, setLoadingPersonnel] = useState(false);
+  const [errorPersonnel, setErrorPersonnel] = useState(null);
+  const [personnelList, setPersonnelList] = useState([]);
+  const [loadingPersonnelModal, setLoadingPersonnelModal] = useState(false);
+
+  //visitor permission group
+  const [visitorGroups, setVisitorGroups] = useState([]);
+  const [visitorGroupsAll, setVisitorGroupsAll] = useState([]);
+
+  const [loadingVisitor, setLoadingVisitor] = useState(false);
+  const [errorVisitor, setErrorVisitor] = useState(null);
+
   // Filters untuk Personnel Permission tab
   const [personnelFilters, setPersonnelFilters] = useState({
-    group: '',
-    phoneEmail: '',
-    sn: '',
+    group: "",
+    phoneEmail: "",
+    sn: "",
   });
 
   // Filters untuk Permission tab
   const [permissionFilters, setPermissionFilters] = useState({
-    group: '',
+    group: "",
   });
 
   const handlePersonnelFilterChange = (field, value) => {
-    setPersonnelFilters(prev => ({ ...prev, [field]: value }));
+    setPersonnelFilters((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePermissionFilterChange = (field, value) => {
-    setPermissionFilters(prev => ({ ...prev, [field]: value }));
+    setPermissionFilters((prev) => ({ ...prev, [field]: value }));
   };
+
+  //get data permission getdatapermission
+  useEffect(() => {
+    if (activeTab !== "personnel") return;
+
+    const fetchPersonnelPermissions = async () => {
+      try {
+        setLoadingPersonnel(true);
+        setErrorPersonnel(null);
+
+        const res = await getPermissionGroups();
+
+        console.log(res.data);
+
+        setPersonnelDataAll(res.data || []);
+        setPersonnelData(res.data || []);
+      } catch (err) {
+        console.error(err);
+        setErrorPersonnel("Failed to load permission data");
+      } finally {
+        setLoadingPersonnel(false);
+      }
+    };
+
+    fetchPersonnelPermissions();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "permission") return;
+
+    const fetchVisitorGroups = async () => {
+      try {
+        setLoadingVisitor(true);
+        setErrorVisitor(null);
+
+        const res = await getVisitorPermissionGroups();
+        setVisitorGroupsAll(res.data || []);
+        setVisitorGroups(res.data || []);
+      } catch (err) {
+        console.error(err);
+        setErrorVisitor("Failed to load visitor groups");
+      } finally {
+        setLoadingVisitor(false);
+      }
+    };
+
+    fetchVisitorGroups();
+  }, [activeTab]);
 
   // If the route is navigated to with location.state.initialTab (from other pages),
   // update the active tab. Some router setups reuse the component instance so
@@ -74,61 +156,175 @@ const PermissionPage = () => {
     }
   }, [location?.state?.initialTab]);
 
+  const handleSearchPersonnel = () => {
+    const { group } = personnelFilters;
+
+    const filtered = personnelDataAll.filter((item) => {
+      if (!group) return true;
+      return item.group_name.toLowerCase().includes(group.toLowerCase());
+    });
+
+    setPersonnelData(filtered);
+  };
+
+  const handleResetPersonnel = () => {
+    setPersonnelFilters({ group: "", phoneEmail: "", sn: "" });
+    setPersonnelData(personnelDataAll);
+  };
+
+  const handleSearchVisitor = () => {
+    const keyword = permissionFilters.group.toLowerCase();
+
+    const filtered = visitorGroupsAll.filter((g) =>
+      g.group_name.toLowerCase().includes(keyword)
+    );
+
+    setVisitorGroups(filtered);
+  };
+  const handleResetVisitor = () => {
+    // reset input filter
+    setPermissionFilters({ group: "" });
+
+    // restore data hasil fetch awal
+    setVisitorGroups(visitorGroupsAll);
+  };
+
   const handleSelectItem = (id) => {
     if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter(item => item !== id));
+      setSelectedItems(selectedItems.filter((item) => item !== id));
     } else {
       setSelectedItems([...selectedItems, id]);
     }
   };
 
   const handleAddGroup = () => {
-    setGroupName('');
+    setGroupName("");
     setIsAddGroupModalOpen(true);
   };
 
-  const handleAddGroupConfirm = () => {
+  const handleAddGroupConfirm = async () => {
     if (!groupName.trim()) {
-      alert('Please enter a group name');
+      alert("Group name is required");
       return;
     }
-    console.log('Adding new permission group:', groupName);
-    // TODO: Add API call to create group
-    setIsAddGroupModalOpen(false);
-    setGroupName('');
+    const payloadAddGroupPerssion = {
+      group_name: groupName.trim(),
+      scope: "person",
+    };
+    try {
+      await addPermissionGroup(payloadAddGroupPerssion);
+
+      // close modal
+      setIsAddGroupModalOpen(false);
+      setGroupName("");
+
+      // reload data
+      const res = await getPermissionGroups();
+      setPersonnelData(res.data || []);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add permission group");
+    }
   };
 
   const handleDelete = () => {
     if (selectedItems.length === 0) {
-      alert('Please select items to delete');
+      alert("Please select items to delete");
       return;
     }
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    console.log('Deleting items:', selectedItems);
-    // TODO: Add API call to delete selected items
-    setSelectedItems([]);
-    setIsDeleteModalOpen(false);
+  const handleDeleteConfirm = async () => {
+    try {
+      if (activeTab === "personnel") {
+        // delete satu per satu (backend kamu single-id)
+        await Promise.all(
+          selectedPersonnelIds.map((id) => deletePermissionGroup(id))
+        );
+
+        const res = await getPermissionGroups();
+        setPersonnelData(res.data || []);
+        setPersonnelDataAll(res.data || []);
+        setSelectedPersonnelIds([]);
+      }
+
+      if (activeTab === "permission") {
+        // NOTE: backend visitor delete belum ada
+        alert("Delete visitor group API not implemented yet");
+        setSelectedVisitorIds([]);
+      }
+
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete data");
+    }
   };
 
-  const handleRenameConfirm = (newName) => {
-    console.log('Rename item:', activeRowItem, '->', newName);
-    // TODO: call API to rename
-    setIsRenameModalOpen(false);
-    setActiveRowItem(null);
+  const handleRenameConfirm = async (newName) => {
+    if (!newName.trim()) {
+      alert("Group name is required");
+      return;
+    }
+
+    if (!activeRowItem?.id) {
+      alert("Invalid group");
+      return;
+    }
+    const payloadRename = {
+      id: activeRowItem.id,
+      new_group_name: newName.trim(),
+    };
+    console.log("payload rename", payloadRename);
+
+    try {
+      await renamePermissionGroup(payloadRename);
+
+      setIsRenameModalOpen(false);
+      setActiveRowItem(null);
+
+      // reload data
+      const res = await getPermissionGroups();
+      setPersonnelData(res.data || []);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to rename permission group");
+    }
   };
 
-  const handleAdjustPersonnelConfirm = (selected) => {
-    console.log('Adjust personnel for:', activeRowItem, 'selected:', selected);
-    // TODO: call API to update personnel mapping
-    setIsAdjustPersonnelModalOpen(false);
-    setActiveRowItem(null);
+  const handleAdjustPersonnelConfirm = async (selectedIds) => {
+    if (!activeRowItem?.group_name) {
+      alert("Invalid permission group");
+      return;
+    }
+
+    if (!selectedIds.length) {
+      alert("Please select at least one personnel");
+      return;
+    }
+
+    try {
+      await adjustPersonGroup({
+        person_ids: selectedIds,
+        new_group_name: activeRowItem.group_name,
+      });
+
+      setIsAdjustPersonnelModalOpen(false);
+      setActiveRowItem(null);
+      setPersonnelList([]);
+
+      // refresh permission table
+      const res = await getPermissionGroups();
+      setPersonnelData(res.data || []);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to adjust personnel");
+    }
   };
 
   const handleAdjustTimeConfirm = (payload) => {
-    console.log('Adjust time for:', activeRowItem, payload);
+    console.log("Adjust time for:", activeRowItem, payload);
     // TODO: call API to update effective time
     setIsAdjustTimeModalOpen(false);
     setActiveRowItem(null);
@@ -138,29 +334,33 @@ const PermissionPage = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      
-      <div className={`flex-1 ${isCollapsed ? 'ml-20' : 'ml-64'} flex flex-col overflow-hidden transition-all duration-300`}>
+
+      <div
+        className={`flex-1 ${
+          isCollapsed ? "ml-20" : "ml-64"
+        } flex flex-col overflow-hidden transition-all duration-300`}
+      >
         <Header />
-        
+
         <main className="flex-1 overflow-y-auto p-8">
           {/* Tabs */}
           <div className="flex gap-4 mb-6">
             <button
-              onClick={() => setActiveTab('personnel')}
+              onClick={() => setActiveTab("personnel")}
               className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
-                activeTab === 'personnel'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300'
+                activeTab === "personnel"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 border border-gray-300"
               }`}
             >
               Personnel Permission
             </button>
             <button
-              onClick={() => setActiveTab('permission')}
+              onClick={() => setActiveTab("permission")}
               className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
-                activeTab === 'permission'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300'
+                activeTab === "permission"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 border border-gray-300"
               }`}
             >
               Permission
@@ -168,7 +368,7 @@ const PermissionPage = () => {
           </div>
 
           {/* Personnel Permission Tab Content */}
-          {activeTab === 'personnel' && (
+          {activeTab === "personnel" && (
             <>
               {/* Filters */}
               <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
@@ -181,7 +381,9 @@ const PermissionPage = () => {
                       type="text"
                       placeholder="Silakan masuk"
                       value={personnelFilters.group}
-                      onChange={(e) => handlePersonnelFilterChange('group', e.target.value)}
+                      onChange={(e) =>
+                        handlePersonnelFilterChange("group", e.target.value)
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -193,7 +395,12 @@ const PermissionPage = () => {
                       type="text"
                       placeholder="Please enter"
                       value={personnelFilters.phoneEmail}
-                      onChange={(e) => handlePersonnelFilterChange('phoneEmail', e.target.value)}
+                      onChange={(e) =>
+                        handlePersonnelFilterChange(
+                          "phoneEmail",
+                          e.target.value
+                        )
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -205,17 +412,24 @@ const PermissionPage = () => {
                       type="text"
                       placeholder="Please enter"
                       value={personnelFilters.sn}
-                      onChange={(e) => handlePersonnelFilterChange('sn', e.target.value)}
+                      onChange={(e) =>
+                        handlePersonnelFilterChange("sn", e.target.value)
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
                 <div className="flex gap-3 justify-end">
-                  <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2">
-                    <span>🔍</span>
-                    Search
+                  <button
+                    onClick={handleSearchPersonnel}
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
+                  >
+                    🔍 Search
                   </button>
-                  <button className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2">
+                  <button
+                    className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+                    onClick={handleResetPersonnel}
+                  >
                     <RotateCcw size={16} />
                     Reset
                   </button>
@@ -224,14 +438,20 @@ const PermissionPage = () => {
 
               {/* Action Buttons */}
               <div className="mb-6 flex flex-wrap gap-3">
-                <button 
+                <button
                   onClick={handleAddGroup}
                   className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium border border-green-200"
                 >
                   + Add Permission Group
                 </button>
-                <button 
-                  onClick={handleDelete}
+                <button
+                  onClick={() => {
+                    if (selectedIds.length === 0) {
+                      alert("Please select data to delete");
+                      return;
+                    }
+                    setIsDeleteModalOpen(true);
+                  }}
                   className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200"
                 >
                   Delete Data
@@ -249,66 +469,136 @@ const PermissionPage = () => {
                           className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
                         />
                       </th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Group</th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Personnel Count</th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Device Count</th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Effective Period</th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Operation</th>
+                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Group
+                      </th>
+                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Personnel Count
+                      </th>
+                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Device Count
+                      </th>
+                      {/* <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Effective Period
+                      </th> */}
+                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Operation
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {personnelPermissionData.map((item) => (
-                      <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td className="py-4 px-6">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.includes(item.id)}
-                            onChange={() => handleSelectItem(item.id)}
-                            className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="py-4 px-6 text-gray-700">{item.group}</td>
-                        <td className="py-4 px-6 text-gray-700">{item.personnelCount}</td>
-                        <td className="py-4 px-6 text-gray-700">{item.deviceCount}</td>
-                        <td className="py-4 px-6 text-gray-700">{item.effectivePeriod}</td>
-                        <td className="py-4 px-6">
-                          <div className="flex flex-col gap-1">
-                            <button
-                              onClick={() => { setActiveRowItem(item); setIsRenameModalOpen(true); }}
-                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                            >
-                              Rename
-                            </button>
-                            <button
-                              onClick={() => { setActiveRowItem(item); setIsAdjustPersonnelModalOpen(true); }}
-                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                            >
-                              Adjust Personnel
-                            </button>
-                            <button
-                              onClick={() => navigate('/device')}
-                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                            >
-                              Adjust Device
-                            </button>
-                            <button
-                              onClick={() => { setActiveRowItem(item); setIsAdjustTimeModalOpen(true); }}
-                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                            >
-                              Adjust Time
-                            </button>
-                          </div>
+                    {loadingPersonnel && (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="py-6 text-center text-gray-500"
+                        >
+                          Loading permission data...
                         </td>
                       </tr>
-                    ))}
+                    )}
+
+                    {!loadingPersonnel && personnelData.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="py-6 text-center text-gray-500"
+                        >
+                          No permission groups found
+                        </td>
+                      </tr>
+                    )}
+
+                    {!loadingPersonnel &&
+                      personnelData.map((item) => (
+                        <tr
+                          key={item.id}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="py-4 px-6">
+                            <input
+                              type="checkbox"
+                              checked={selectedPersonnelIds.includes(item.id)}
+                              onChange={() =>
+                                setSelectedPersonnelIds((prev) =>
+                                  prev.includes(item.id)
+                                    ? prev.filter((x) => x !== item.id)
+                                    : [...prev, item.id]
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {item.group_name}
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {item.person_count}
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {item.device_count}
+                          </td>
+                          {/* <td className="py-4 px-6 text-gray-700">
+                            {item.effectivePeriod} 
+                          </td> */}
+                          <td className="py-4 px-6">
+                            <div className="flex flex-col gap-1">
+                              <button
+                                onClick={() => {
+                                  setActiveRowItem(item);
+                                  setIsRenameModalOpen(true);
+                                }}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
+                                Rename
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  setActiveRowItem(item);
+                                  setIsAdjustPersonnelModalOpen(true);
+
+                                  try {
+                                    setLoadingPersonnelModal(true);
+                                    const res = await getPersonsByGroup(
+                                      item.group_name
+                                    );
+                                    setPersonnelList(res.data || []);
+                                  } catch (err) {
+                                    console.error(err);
+                                    setPersonnelList([]);
+                                  } finally {
+                                    setLoadingPersonnelModal(false);
+                                  }
+                                }}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
+                                Adjust Personnel
+                              </button>
+
+                              <button
+                                onClick={() => navigate("/device")}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
+                                Adjust Device
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setActiveRowItem(item);
+                                  setIsAdjustTimeModalOpen(true);
+                                }}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
+                                Adjust Time
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
-                
+
                 {/* Pagination */}
                 <div className="flex items-center justify-between p-4 border-t border-gray-200">
-                  <div className="text-sm text-gray-600">
-                    Total 0
-                  </div>
+                  <div className="text-sm text-gray-600">Total 0</div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600">20/page</span>
@@ -331,8 +621,8 @@ const PermissionPage = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <span>Go to</span>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         defaultValue="1"
                         className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
                       />
@@ -344,7 +634,7 @@ const PermissionPage = () => {
           )}
 
           {/* Permission Tab Content */}
-          {activeTab === 'permission' && (
+          {activeTab === "permission" && (
             <>
               {/* Filters */}
               <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
@@ -357,17 +647,26 @@ const PermissionPage = () => {
                       type="text"
                       placeholder="Please enter"
                       value={permissionFilters.group}
-                      onChange={(e) => handlePermissionFilterChange('group', e.target.value)}
+                      onChange={(e) =>
+                        handlePermissionFilterChange("group", e.target.value)
+                      }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
                 <div className="flex gap-3 justify-end">
-                  <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2">
+                  <button
+                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
+                    onClick={handleSearchVisitor}
+                  >
                     <span>🔍</span>
                     Search
                   </button>
-                  <button className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2">
+
+                  <button
+                    onClick={handleResetVisitor}
+                    className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+                  >
                     <RotateCcw size={16} />
                     Reset
                   </button>
@@ -376,14 +675,20 @@ const PermissionPage = () => {
 
               {/* Action Buttons */}
               <div className="mb-6 flex flex-wrap gap-3">
-                <button 
+                <button
                   onClick={handleAddGroup}
                   className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium border border-green-200"
                 >
                   + Add Permission Group
                 </button>
-                <button 
-                  onClick={handleDelete}
+                <button
+                  onClick={() => {
+                    if (selectedIds.length === 0) {
+                      alert("Please select data to delete");
+                      return;
+                    }
+                    setIsDeleteModalOpen(true);
+                  }}
                   className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200"
                 >
                   Delete Data
@@ -401,50 +706,92 @@ const PermissionPage = () => {
                           className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
                         />
                       </th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Visitor Permission</th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Traffic Device Count</th>
-                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">Operation</th>
+                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Visitor Permission
+                      </th>
+                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Traffic Device Count
+                      </th>
+                      <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                        Operation
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {permissionGroupData.map((item) => (
-                      <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td className="py-4 px-6">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.includes(item.id)}
-                            onChange={() => handleSelectItem(item.id)}
-                            className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
-                          />
-                        </td>
-                        <td className="py-4 px-6 text-gray-700">{item.visitorPermission}</td>
-                        <td className="py-4 px-6 text-gray-700">{item.trafficDeviceCount}</td>
-                        <td className="py-4 px-6">
-                          <div className="flex flex-col gap-1">
-                            <button
-                              onClick={() => { setActiveRowItem(item); setIsRenameModalOpen(true); }}
-                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                            >
-                              Rename
-                            </button>
-                            <button
-                              onClick={() => navigate('/device')}
-                              className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                            >
-                              Adjust Device
-                            </button>
-                          </div>
+                    {loadingVisitor && (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="py-6 text-center text-gray-500"
+                        >
+                          Loading visitor groups...
                         </td>
                       </tr>
-                    ))}
+                    )}
+
+                    {!loadingVisitor && visitorGroups.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="py-6 text-center text-gray-500"
+                        >
+                          No visitor permission groups
+                        </td>
+                      </tr>
+                    )}
+
+                    {!loadingVisitor &&
+                      visitorGroups.map((item) => (
+                        <tr
+                          key={item.id}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="py-4 px-6">
+                            <input
+                              type="checkbox"
+                              checked={selectedPersonnelIds.includes(item.id)}
+                              onChange={() =>
+                                setSelectedPersonnelIds((prev) =>
+                                  prev.includes(item.id)
+                                    ? prev.filter((x) => x !== item.id)
+                                    : [...prev, item.id]
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {item.group_name}
+                          </td>
+                          <td className="py-4 px-6 text-gray-700">
+                            {item.device_count ?? "-"}
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex flex-col gap-1">
+                              <button
+                                onClick={() => {
+                                  setActiveRowItem(item);
+                                  setIsRenameModalOpen(true);
+                                }}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
+                                Rename
+                              </button>
+                              <button
+                                onClick={() => navigate("/device")}
+                                className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                              >
+                                Adjust Device
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
-                
+
                 {/* Pagination */}
                 <div className="flex items-center justify-between p-4 border-t border-gray-200">
-                  <div className="text-sm text-gray-600">
-                    Total 0
-                  </div>
+                  <div className="text-sm text-gray-600">Total 0</div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600">20/page</span>
@@ -467,8 +814,8 @@ const PermissionPage = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <span>Go to</span>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         defaultValue="1"
                         className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
                       />
@@ -493,28 +840,38 @@ const PermissionPage = () => {
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteConfirm}
-          message={`Confirm removing the selected ${selectedItems.length} permission group(s)?`}
+          message={`Confirm removing the selected ${selectedIds.length} item(s)?`}
         />
 
         <RenameModal
           isOpen={isRenameModalOpen}
           onClose={() => setIsRenameModalOpen(false)}
-          currentName={activeRowItem ? (activeRowItem.group || activeRowItem.visitorPermission || '') : ''}
+          currentName={
+            activeRowItem
+              ? activeRowItem.group_name ||
+                activeRowItem.visitorPermission ||
+                ""
+              : ""
+          }
           onConfirm={handleRenameConfirm}
         />
 
         <AdjustPersonnelModal
           isOpen={isAdjustPersonnelModalOpen}
-          onClose={() => setIsAdjustPersonnelModalOpen(false)}
-          onConfirm={handleAdjustPersonnelConfirm}
+          onClose={() => {
+            setIsAdjustPersonnelModalOpen(false);
+            setPersonnelList([]);
+          }}
+          personnelList={personnelList}
           initialSelected={[]}
+          onConfirm={handleAdjustPersonnelConfirm}
         />
 
         <AdjustTimeModal
           isOpen={isAdjustTimeModalOpen}
           onClose={() => setIsAdjustTimeModalOpen(false)}
           onConfirm={handleAdjustTimeConfirm}
-          initial={{ type: 'permanent' }}
+          initial={{ type: "permanent" }}
         />
       </div>
     </div>

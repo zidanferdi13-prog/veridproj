@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-const AdjustPersonnelModal = ({ isOpen, onClose, onConfirm, initialSelected, personnelList = [] }) => {
+const AdjustPersonnelModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  initialSelected,
+  personnelList = [],
+}) => {
   const [selected, setSelected] = useState(initialSelected || []);
 
   useEffect(() => {
@@ -9,7 +15,9 @@ const AdjustPersonnelModal = ({ isOpen, onClose, onConfirm, initialSelected, per
   }, [isOpen]);
 
   const toggle = (id) => {
-    setSelected((s) => (s.includes(id) ? s.filter(x => x !== id) : [...s, id]));
+    setSelected((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
+    );
   };
 
   if (!isOpen) return null;
@@ -25,43 +33,77 @@ const AdjustPersonnelModal = ({ isOpen, onClose, onConfirm, initialSelected, per
           {/* Left: list */}
           <div className="bg-white border rounded p-4 h-72 overflow-auto">
             <div className="mb-3">
-              <input className="w-full px-3 py-2 border rounded" placeholder="Query personnel under the current group" />
+              <input
+                className="w-full px-3 py-2 border rounded"
+                placeholder="Query personnel under the current group"
+              />
             </div>
             <ul className="space-y-2 text-sm">
-              {(personnelList.length ? personnelList : [1,2,3,4,5,6]).map((p) => {
-                const id = typeof p === 'object' ? p.id : p;
-                const label = typeof p === 'object' ? p.label || p.name || `Person ${id}` : `Person #${id}`;
-                return (
-                  <li key={id} className="flex items-center gap-3">
-                    <input type="checkbox" checked={selected.includes(id)} onChange={() => toggle(id)} />
-                    <span className="text-cyan-600">{label}</span>
-                  </li>
-                );
-              })}
+              {(personnelList.length ? personnelList : [1, 2, 3, 4, 5, 6]).map(
+                (p) => {
+                  const id = typeof p === "object" ? p.id : p;
+                  const label =
+                    typeof p === "object"
+                      ? `${p.name} (${p.employee_number || "-"})`
+                      : `Person #${id}`;
+
+                  return (
+                    <li key={id} className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(id)}
+                        onChange={() => toggle(id)}
+                      />
+                      <span className="text-cyan-600">{label}</span>
+                    </li>
+                  );
+                }
+              )}
             </ul>
           </div>
 
           {/* Right: selected */}
           <div className="bg-white border rounded p-4 h-72 overflow-auto">
-            <div className="text-sm font-medium mb-3">Selected: {selected.length}</div>
+            <div className="text-sm font-medium mb-3">
+              Selected: {selected.length}
+            </div>
             <ul className="space-y-3">
-              {selected.length === 0 && <li className="text-sm text-gray-500">No selection</li>}
-              {selected.map(id => (
-                <li key={id} className="flex justify-between items-center bg-gray-50 p-3 rounded">
+              {selected.length === 0 && (
+                <li className="text-sm text-gray-500">No selection</li>
+              )}
+              {selected.map((id) => (
+                <li
+                  key={id}
+                  className="flex justify-between items-center bg-gray-50 p-3 rounded"
+                >
                   <div className="text-sm">Person #{id}</div>
-                  <button onClick={() => toggle(id)} className="text-red-500">×</button>
+                  <button onClick={() => toggle(id)} className="text-red-500">
+                    ×
+                  </button>
                 </li>
               ))}
             </ul>
             <div className="mt-4">
-              <button className="px-3 py-2 bg-green-50 text-green-600 rounded border border-green-200 text-sm">Show all selected&gt;&gt;</button>
+              <button className="px-3 py-2 bg-green-50 text-green-600 rounded border border-green-200 text-sm">
+                Show all selected&gt;&gt;
+              </button>
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-center gap-4 p-6 border-t">
-          <button onClick={onClose} className="px-6 py-2 border border-gray-300 rounded bg-white">Cancel</button>
-          <button onClick={() => onConfirm(selected)} className="px-6 py-2 bg-blue-400 text-white rounded">Confirm</button>
+          <button
+            onClick={onClose}
+            className="px-6 py-2 border border-gray-300 rounded bg-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onConfirm(selected)}
+            className="px-6 py-2 bg-blue-400 text-white rounded"
+          >
+            Confirm
+          </button>
         </div>
       </div>
     </div>
