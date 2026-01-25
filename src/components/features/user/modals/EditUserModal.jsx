@@ -11,7 +11,7 @@ const EditUserModal = ({
   editingUser,
   onError,
 }) => {
-  const api = import.meta.env.VITE_API_URL || "http://localhost:3000/";
+  const api = import.meta.env.VITE_API_URL;
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirmEdit = async () => {
