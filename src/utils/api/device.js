@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const url = "http://localhost:3000/device";
+// const url = "http://localhost:3000/device";
+const url = import.meta.env.VITE_API_URL;
 
 export const addDevice = async (data) => {
   return axios.post(`${url}/devicedata/adddevice`, data);
