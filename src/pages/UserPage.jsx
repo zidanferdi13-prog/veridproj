@@ -102,7 +102,10 @@ const UserPage = () => {
     setFilteredUser(dataUser);
   }, [dataUser]);
 
-  const api = "http://localhost:3000/";
+  // const api = "http://localhost:3000/";
+  const api = import.meta.env.VITE_API_URL;
+
+  // ========== API CALLS ==========
 
   const getUser = async () => {
     try {
