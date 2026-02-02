@@ -5,15 +5,26 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check localStorage saat component mount
     const token = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
 
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
+      try {
+        setUser(JSON.parse(savedUser));
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Error parsing saved user:", error);
+        // Clear invalid data
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
     }
+    
+    setIsLoading(false);
   }, []);
 
   const login = (userData) => {
@@ -33,6 +44,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         isAuthenticated,
+        isLoading,
         login,
         logout,
       }}
@@ -43,3 +55,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+

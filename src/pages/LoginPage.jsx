@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { User, Lock } from "lucide-react";
+import axios from "axios";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(
+    "Username atau password tidak sesuai.",
+  );
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -26,25 +31,15 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setShowError(false);
+    setIsLoading(true);
 
     try {
-      const response = await fetch(`${apiUrl}/logindata`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
+      const response = await axios.post(`${apiUrl}login/logindata`, {
+        username,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setShowError(true);
-        return;
-      }
+      const data = response.data;
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -56,7 +51,34 @@ const LoginPage = () => {
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
+
+      // Handle berbagai jenis error
+      if (error.response) {
+        // Server respond dengan status code error
+        if (error.response.status === 401 || error.response.status === 400) {
+          setErrorMessage("Username atau password tidak sesuai.");
+        } else {
+          setErrorMessage(
+            error.response.data?.message || "Terjadi kesalahan di server.",
+          );
+        }
+      } else if (error.request) {
+        // Request made tapi no response dari server
+        if (error.code === "ERR_NETWORK") {
+          setErrorMessage(
+            "Tidak dapat menghubungi server. Periksa koneksi internet Anda.",
+          );
+        } else {
+          setErrorMessage("Tidak ada respons dari server. Coba lagi nanti.");
+        }
+      } else {
+        // Error lainnya
+        setErrorMessage("Terjadi kesalahan saat login. Coba lagi.");
+      }
+
       setShowError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,9 +107,7 @@ const LoginPage = () => {
               <h3 className="text-xl font-bold text-gray-800 mb-2">
                 Login Failed
               </h3>
-              <p className="text-gray-600 text-center mb-6">
-                Username atau password tidak sesuai. Silakan coba lagi.
-              </p>
+              <p className="text-gray-600 text-center mb-6">{errorMessage}</p>
               <button
                 onClick={() => setShowError(false)}
                 className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
@@ -179,9 +199,10 @@ const LoginPage = () => {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-lg"
+            disabled={isLoading}
+            className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 
