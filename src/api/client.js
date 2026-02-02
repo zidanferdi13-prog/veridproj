@@ -3,14 +3,14 @@
  * Handles authentication, error handling, and request/response interceptors
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Get authentication token from storage or context
  */
 const getAuthToken = () => {
   // Try to get token from localStorage
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
   return token;
 };
 
@@ -26,6 +26,11 @@ class ApiClient {
    * Build full URL with query parameters
    */
   buildURL(endpoint, params = {}) {
+    if (!this.baseURL) {
+      console.warn('API Base URL not configured. Using endpoint:', endpoint);
+      throw new Error('API Base URL is not configured. Check your environment variables.');
+    }
+    
     const url = new URL(`${this.baseURL}${endpoint}`);
     
     // Add query parameters
