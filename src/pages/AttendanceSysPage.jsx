@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Sidebar, Header } from '@components';
+import { MainLayout } from '@components';
 import { Calendar } from 'lucide-react';
 
 const AttendanceSysPage = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedDate, setSelectedDate] = useState('2025-12-09');
   const [currentMonth, setCurrentMonth] = useState('December');
   const [currentYear, setCurrentYear] = useState(2025);
@@ -27,13 +26,8 @@ const AttendanceSysPage = () => {
   const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      
-      <div className={`flex-1 ${isCollapsed ? 'ml-20' : 'ml-64'} flex flex-col overflow-hidden transition-all duration-300`}>
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-8">
+    <MainLayout>
+      <main className="flex-1 overflow-y-auto p-8">
           <div className="flex gap-6">
             {/* Left Sidebar Menu */}
             <div className="w-64 flex-shrink-0">
@@ -352,8 +346,7 @@ const AttendanceSysPage = () => {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

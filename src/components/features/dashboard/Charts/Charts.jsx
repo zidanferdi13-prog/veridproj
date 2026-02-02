@@ -43,17 +43,17 @@ const AttendanceTrendChart = () => {
 
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <BarChart3 size={24} className="text-gray-700" />
-          <h3 className="text-lg font-semibold text-gray-800">Attendance Trend</h3>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 md:gap-0">
+        <div className="flex items-center gap-2 md:gap-3">
+          <BarChart3 size={20} className="text-gray-700 md:w-6 md:h-6" />
+          <h3 className="text-base md:text-lg font-semibold text-gray-800">Attendance Trend</h3>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {['Daily', 'Weekly', 'Monthly'].map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors ${
                 activeFilter === filter
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -65,26 +65,26 @@ const AttendanceTrendChart = () => {
         </div>
       </div>
       {loading && (
-        <div className="flex items-center justify-center h-[250px] text-gray-500">
+        <div className="flex items-center justify-center h-[200px] md:h-[250px] text-gray-500 text-sm">
           Loading chart data...
         </div>
       )}
       {error && !loading && (
-        <div className="flex items-center justify-center h-[250px] text-red-500 text-sm">
+        <div className="flex items-center justify-center h-[200px] md:h-[250px] text-red-500 text-xs md:text-sm">
           Error: {error}
         </div>
       )}
       {!loading && !error && (
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={200} className="md:h-[250px]">
           <BarChart data={attendanceData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis 
               dataKey="time" 
-              tick={{ fill: '#6B7280', fontSize: 12 }}
+              tick={{ fill: '#6B7280', fontSize: 10 }}
               axisLine={{ stroke: '#E5E7EB' }}
             />
             <YAxis 
-              tick={{ fill: '#6B7280', fontSize: 12 }}
+              tick={{ fill: '#6B7280', fontSize: 10 }}
               axisLine={{ stroke: '#E5E7EB' }}
               domain={[0, 200]}
               ticks={[0, 50, 100, 150, 200]}
@@ -147,17 +147,17 @@ const TodayRecapChart = () => {
 
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <BarChart3 size={24} className="text-gray-700" />
-          <h3 className="text-lg font-semibold text-gray-800">Today Recap</h3>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 md:gap-0">
+        <div className="flex items-center gap-2 md:gap-3">
+          <BarChart3 size={20} className="text-gray-700 md:w-6 md:h-6" />
+          <h3 className="text-base md:text-lg font-semibold text-gray-800">Today Recap</h3>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {['Daily', 'Weekly', 'Monthly'].map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-colors ${
                 activeFilter === filter
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -169,25 +169,25 @@ const TodayRecapChart = () => {
         </div>
       </div>
       {loading && (
-        <div className="flex items-center justify-center h-[200px] text-gray-500">
+        <div className="flex items-center justify-center h-[200px] text-gray-500 text-sm">
           Loading chart data...
         </div>
       )}
       {error && !loading && (
-        <div className="flex items-center justify-center h-[200px] text-red-500 text-sm">
+        <div className="flex items-center justify-center h-[200px] text-red-500 text-xs md:text-sm">
           Error: {error}
         </div>
       )}
       {!loading && !error && (
-        <div className="flex items-center justify-between">
-          <ResponsiveContainer width="60%" height={200}>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <ResponsiveContainer width="100%" height={200} className="lg:w-[60%]">
             <PieChart>
               <Pie
                 data={recapData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={90}
+                innerRadius={50}
+                outerRadius={80}
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -197,14 +197,14 @@ const TodayRecapChart = () => {
               </Pie>
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 md:gap-3 lg:w-[40%]">
             {recapData.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
                 <div 
-                  className="w-3 h-3 rounded-full" 
+                  className="w-2 h-2 md:w-3 md:h-3 rounded-full flex-shrink-0" 
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-sm text-gray-600">{item.name}</span>
+                <span className="text-xs md:text-sm text-gray-600">{item.name}</span>
               </div>
             ))}
           </div>
@@ -216,7 +216,7 @@ const TodayRecapChart = () => {
 
 const Charts = () => {
   return (
-    <div className="grid grid-cols-2 gap-6 mb-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
       <AttendanceTrendChart />
       <TodayRecapChart />
     </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Sidebar, Header } from "@components";
+import { MainLayout } from "@components";
 import {
   EditUserModal,
   AddPersonnelModal,
@@ -55,7 +55,6 @@ import axios from "axios";
 // ==================== MAIN COMPONENT ====================
 const UserPage = () => {
   // ========== STATE ==========
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState("Veridface Company");
   const [filters, setFilters] = useState({
     name: "",
@@ -446,197 +445,181 @@ const UserPage = () => {
   // ========== RENDER ==========
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-
-      <div
-        className={`flex-1 ${
-          isCollapsed ? "ml-20" : "ml-64"
-        } flex flex-col overflow-hidden transition-all duration-300`}
-      >
-        <Header />
-
-        <main className="flex-1 overflow-y-auto p-8">
-          {/* Filters */}
-          <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Please enter"
-                  value={filters.name}
-                  onChange={(e) => handleFilterChange("name", e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  placeholder="Please enter"
-                  value={filters.phone}
-                  onChange={(e) => handleFilterChange("phone", e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="text"
-                  placeholder="Please enter"
-                  value={filters.email}
-                  onChange={(e) => handleFilterChange("email", e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+    <>
+      <MainLayout>
+        {/* Filters */}
+        <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Name
+              </label>
+              <input
+                type="text"
+                placeholder="Please enter"
+                value={filters.name}
+                onChange={(e) => handleFilterChange("name", e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={handleSearch}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
-              >
-                <span>🔍</span>
-                Search
-              </button>
-
-              <button
-                onClick={handleResetFilter}
-                className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-              >
-                <RotateCcw size={16} />
-                Reset
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone
+              </label>
+              <input
+                type="text"
+                placeholder="Please enter"
+                value={filters.phone}
+                onChange={(e) => handleFilterChange("phone", e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="text"
+                placeholder="Please enter"
+                value={filters.email}
+                onChange={(e) => handleFilterChange("email", e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={handleSearch}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2"
+            >
+              <span>🔍</span>
+              Search
+            </button>
 
-          {/* Action Buttons */}
-          <div className="mb-6 flex flex-wrap gap-3">
             <button
-              onClick={handleAddPersonnelClick}
-              className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium border border-green-200"
+              onClick={handleResetFilter}
+              className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
             >
-              + Add New
-            </button>
-            {/* <button
-              onClick={handleImportClick}
-              className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
-            >
-              Import Data
-            </button> */}
-            <button
-              onClick={handleExportClick}
-              className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
-            >
-              Export Data
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200"
-            >
-              Delete Data
+              <RotateCcw size={16} />
+              Reset
             </button>
           </div>
+        </div>
 
-          {/* Table */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="py-4 px-6">
+        {/* Action Buttons */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          <button
+            onClick={handleAddPersonnelClick}
+            className="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium border border-green-200"
+          >
+            + Add New
+          </button>
+          <button
+            onClick={handleExportClick}
+            className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
+          >
+            Export Data
+          </button>
+          <button
+            onClick={handleDeleteClick}
+            className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200"
+          >
+            Delete Data
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="py-4 px-6">
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={selectedUsers.length === dataUser.length}
+                      className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                    Name
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                    Phone
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                    Email
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                    Group
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                    Create time
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                    Credential
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                    Operation
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUser?.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="py-4 px-6">
                       <input
                         type="checkbox"
-                        onChange={handleSelectAll}
-                        checked={selectedUsers.length === dataUser.length}
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => handleSelectUser(user.id)}
                         className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
                       />
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Name
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Phone
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Email
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Group
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Create time
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Credential
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Operation
-                    </th>
+                    </td>
+                    <td className="py-4 px-6 text-gray-700">{user.name}</td>
+                    <td className="py-4 px-6 text-gray-500">{user.mobile}</td>
+                    <td className="py-4 px-6 text-gray-700">{user.email}</td>
+                    <td className="py-4 px-6 text-gray-700">
+                      {user.group_name}
+                    </td>
+                    <td className="py-4 px-6 text-gray-700">
+                      {dateFormat(user.created_at)}
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Eye size={18} className="text-blue-500" />
+                        </button>
+                        <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                          <CreditCard size={18} className="text-gray-400" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => handleEditClick(user)}
+                          className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleCredentialClick(user)}
+                          className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
+                        >
+                          Credential Management
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredUser?.map((user) => (
-                    <tr
-                      key={user.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="py-4 px-6">
-                        <input
-                          type="checkbox"
-                          checked={selectedUsers.includes(user.id)}
-                          onChange={() => handleSelectUser(user.id)}
-                          className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="py-4 px-6 text-gray-700">{user.name}</td>
-                      <td className="py-4 px-6 text-gray-500">{user.mobile}</td>
-                      <td className="py-4 px-6 text-gray-700">{user.email}</td>
-                      <td className="py-4 px-6 text-gray-700">
-                        {user.group_name}
-                      </td>
-                      <td className="py-4 px-6 text-gray-700">
-                        {dateFormat(user.created_at)}
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-2">
-                          <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-                            <Eye size={18} className="text-blue-500" />
-                          </button>
-                          <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-                            <CreditCard size={18} className="text-gray-400" />
-                          </button>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex flex-col gap-1">
-                          <button
-                            onClick={() => handleEditClick(user)}
-                            className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleCredentialClick(user)}
-                            className="text-blue-500 hover:text-blue-600 font-medium text-sm text-left"
-                          >
-                            Credential Management
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </main>
+        </div>
 
         {/* Modals */}
         <EditUserModal
@@ -691,7 +674,7 @@ const UserPage = () => {
           onCredentialChange={handleCredentialChange}
           onConfirm={handleCredentialConfirm}
         />
-      </div>
+      </MainLayout>
 
       {toast && (
         <Toast
@@ -700,7 +683,7 @@ const UserPage = () => {
           onClose={() => setToast(null)}
         />
       )}
-    </div>
+    </>
   );
 };
 

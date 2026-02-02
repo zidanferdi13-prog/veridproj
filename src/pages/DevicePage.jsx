@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Sidebar, Header } from "@components";
+import { MainLayout } from "@components";
 import {
   AddDeviceModal,
   ConfigurationModal,
@@ -21,7 +21,6 @@ import {
 } from "../utils/api/device";
 
 const DevicePage = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState("All");
   const [deviceData, setDeviceData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -370,17 +369,8 @@ const DevicePage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-
-      <div
-        className={`flex-1 ${
-          isCollapsed ? "ml-20" : "ml-64"
-        } flex flex-col overflow-hidden transition-all duration-300`}
-      >
-        <Header />
-
-        <main className="flex-1 overflow-y-auto p-8">
+    <MainLayout>
+      <main className="flex-1 overflow-y-auto p-8">
           <div className="flex gap-6">
             {/* Main Content */}
             <div className="flex-1">
@@ -722,8 +712,7 @@ const DevicePage = () => {
           loading={permissionLoading}
           deviceName={selectedDevice?.device}
         />
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

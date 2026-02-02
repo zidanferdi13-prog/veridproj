@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sidebar, Header } from "@components";
+import { MainLayout } from "@components";
 import { useLocation } from "react-router-dom";
 import {
   AddGroupModal,
@@ -42,7 +42,6 @@ import {
 
 // ==================== MAIN COMPONENT ====================
 const PermissionPage = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(
@@ -332,46 +331,36 @@ const PermissionPage = () => {
 
   // ========== RENDER ==========
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+    <MainLayout>
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab("personnel")}
+          className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
+            activeTab === "personnel"
+              ? "bg-blue-500 text-white"
+              : "bg-white text-gray-700 border border-gray-300"
+          }`}
+        >
+          Personnel Permission
+        </button>
+        <button
+          onClick={() => setActiveTab("permission")}
+          className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
+            activeTab === "permission"
+              ? "bg-blue-500 text-white"
+              : "bg-white text-gray-700 border border-gray-300"
+          }`}
+        >
+          Visitor Permission
+        </button>
+      </div>
 
-      <div
-        className={`flex-1 ${
-          isCollapsed ? "ml-20" : "ml-64"
-        } flex flex-col overflow-hidden transition-all duration-300`}
-      >
-        <Header />
-
-        <main className="flex-1 overflow-y-auto p-8">
-          {/* Tabs */}
-          <div className="flex gap-4 mb-6">
-            <button
-              onClick={() => setActiveTab("personnel")}
-              className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
-                activeTab === "personnel"
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-700 border border-gray-300"
-              }`}
-            >
-              Personnel Permission
-            </button>
-            <button
-              onClick={() => setActiveTab("permission")}
-              className={`px-6 py-2.5 rounded-lg font-medium transition-colors ${
-                activeTab === "permission"
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-700 border border-gray-300"
-              }`}
-            >
-              Visitor Permission
-            </button>
-          </div>
-
-          {/* Personnel Permission Tab Content */}
-          {activeTab === "personnel" && (
-            <>
-              {/* Filters */}
-              <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+      {/* Personnel Permission Tab Content */}
+      {activeTab === "personnel" && (
+        <>
+          {/* Filters */}
+          <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -825,56 +814,54 @@ const PermissionPage = () => {
               </div>
             </>
           )}
-        </main>
+      
+      {/* Modals */}
+      <AddGroupModal
+        isOpen={isAddGroupModalOpen}
+        onClose={() => setIsAddGroupModalOpen(false)}
+        groupName={groupName}
+        onGroupNameChange={setGroupName}
+        onConfirm={handleAddGroupConfirm}
+      />
 
-        {/* Modals */}
-        <AddGroupModal
-          isOpen={isAddGroupModalOpen}
-          onClose={() => setIsAddGroupModalOpen(false)}
-          groupName={groupName}
-          onGroupNameChange={setGroupName}
-          onConfirm={handleAddGroupConfirm}
-        />
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        message={`Confirm removing the selected ${selectedIds.length} item(s)?`}
+      />
 
-        <DeleteConfirmModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteConfirm}
-          message={`Confirm removing the selected ${selectedIds.length} item(s)?`}
-        />
+      <RenameModal
+        isOpen={isRenameModalOpen}
+        onClose={() => setIsRenameModalOpen(false)}
+        currentName={
+          activeRowItem
+            ? activeRowItem.group_name ||
+              activeRowItem.visitorPermission ||
+              ""
+            : ""
+        }
+        onConfirm={handleRenameConfirm}
+      />
 
-        <RenameModal
-          isOpen={isRenameModalOpen}
-          onClose={() => setIsRenameModalOpen(false)}
-          currentName={
-            activeRowItem
-              ? activeRowItem.group_name ||
-                activeRowItem.visitorPermission ||
-                ""
-              : ""
-          }
-          onConfirm={handleRenameConfirm}
-        />
+      <AdjustPersonnelModal
+        isOpen={isAdjustPersonnelModalOpen}
+        onClose={() => {
+          setIsAdjustPersonnelModalOpen(false);
+          setPersonnelList([]);
+        }}
+        personnelList={personnelList}
+        initialSelected={[]}
+        onConfirm={handleAdjustPersonnelConfirm}
+      />
 
-        <AdjustPersonnelModal
-          isOpen={isAdjustPersonnelModalOpen}
-          onClose={() => {
-            setIsAdjustPersonnelModalOpen(false);
-            setPersonnelList([]);
-          }}
-          personnelList={personnelList}
-          initialSelected={[]}
-          onConfirm={handleAdjustPersonnelConfirm}
-        />
-
-        <AdjustTimeModal
-          isOpen={isAdjustTimeModalOpen}
-          onClose={() => setIsAdjustTimeModalOpen(false)}
-          onConfirm={handleAdjustTimeConfirm}
-          initial={{ type: "permanent" }}
-        />
-      </div>
-    </div>
+      <AdjustTimeModal
+        isOpen={isAdjustTimeModalOpen}
+        onClose={() => setIsAdjustTimeModalOpen(false)}
+        onConfirm={handleAdjustTimeConfirm}
+        initial={{ type: "permanent" }}
+      />
+    </MainLayout>
   );
 };
 

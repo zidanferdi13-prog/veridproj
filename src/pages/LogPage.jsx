@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sidebar, Header } from '@components';
+import { MainLayout } from '@components';
 import { RotateCcw } from 'lucide-react';
 import { ExportLogModal, ResendPermissionModal } from '@components/features/log/modals';
 
@@ -46,7 +46,6 @@ const logData = [
 ];
 
 const LogPage = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('access');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isResendModalOpen, setIsResendModalOpen] = useState(false);
@@ -645,13 +644,8 @@ const LogPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      
-      <div className={`flex-1 ${isCollapsed ? 'ml-20' : 'ml-64'} flex flex-col overflow-hidden transition-all duration-300`}>
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-8">
+    <MainLayout>
+      <main className="flex-1 overflow-y-auto p-8">
           {/* Tabs */}
           <div className="flex gap-4 mb-6">
             <button
@@ -813,8 +807,7 @@ const LogPage = () => {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

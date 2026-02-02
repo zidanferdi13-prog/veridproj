@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Sidebar, Header } from "@components";
+import { MainLayout } from "@components";
 import {
   InviteVisitorModal,
   VisitorAppCodeModal,
@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { addVisitor, deleteVisitor, getVisitors } from "../utils/api/visitor";
 
 const VisitorPage = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("list");
   const [selectedItems, setSelectedItems] = useState([]);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -102,43 +101,35 @@ const VisitorPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+    <MainLayout>
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab("list")}
+          className={`px-6 py-2.5 rounded-t-lg font-medium transition-colors ${
+            activeTab === "list"
+              ? "bg-white text-blue-500 border-b-2 border-blue-500"
+              : "bg-transparent text-gray-600 hover:bg-white"
+          }`}
+        >
+          Visitor List
+        </button>
+        <button
+          onClick={() => setActiveTab("review")}
+          className={`px-6 py-2.5 rounded-t-lg font-medium transition-colors ${
+            activeTab === "review"
+              ? "bg-white text-blue-500 border-b-2 border-blue-500"
+              : "bg-transparent text-gray-600 hover:bg-white"
+          }`}
+        >
+          Visitor review
+        </button>
+      </div>
 
-      <div
-        className={`flex-1 ${isCollapsed ? "ml-20" : "ml-64"} flex flex-col overflow-hidden transition-all duration-300`}
-      >
-        <Header />
-
-        <main className="flex-1 overflow-y-auto p-8">
-          {/* Tabs */}
-          <div className="flex gap-4 mb-6">
-            <button
-              onClick={() => setActiveTab("list")}
-              className={`px-6 py-2.5 rounded-t-lg font-medium transition-colors ${
-                activeTab === "list"
-                  ? "bg-white text-blue-500 border-b-2 border-blue-500"
-                  : "bg-transparent text-gray-600 hover:bg-white"
-              }`}
-            >
-              Visitor List
-            </button>
-            <button
-              onClick={() => setActiveTab("review")}
-              className={`px-6 py-2.5 rounded-t-lg font-medium transition-colors ${
-                activeTab === "review"
-                  ? "bg-white text-blue-500 border-b-2 border-blue-500"
-                  : "bg-transparent text-gray-600 hover:bg-white"
-              }`}
-            >
-              Visitor review
-            </button>
-          </div>
-
-          {activeTab === "list" && (
-            <>
-              {/* Filters */}
-              <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+      {activeTab === "list" && (
+        <>
+          {/* Filters */}
+          <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -530,9 +521,9 @@ const VisitorPage = () => {
               </div>
             </>
           )}
-        </main>
-        {/* Modals */}
-        <InviteVisitorModal
+      
+      {/* Modals */}
+      <InviteVisitorModal
           isOpen={isInviteOpen}
           onClose={() => setIsInviteOpen(false)}
           onConfirm={handleInviteConfirm}
@@ -546,14 +537,13 @@ const VisitorPage = () => {
           }}
         />
 
-        <DeleteConfirmModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteConfirm}
-          message={`Confirm removing the selected ${selectedItems.length} visitor(s)?`}
-        />
-      </div>
-    </div>
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        message={`Confirm removing the selected ${selectedItems.length} visitor(s)?`}
+      />
+    </MainLayout>
   );
 };
 

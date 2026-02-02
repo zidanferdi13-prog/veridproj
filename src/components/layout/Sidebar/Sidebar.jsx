@@ -29,7 +29,7 @@ const menuItems = [
   { icon: Settings, label: 'Setting', path: '/setting' },
 ];
 
-const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile = false, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
@@ -41,10 +41,14 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   const handleMenuClick = (path) => {
     navigate(path);
+    // Close mobile sidebar after navigation
+    if (isMobile && onClose) {
+      onClose();
+    }
   };
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-white h-screen flex flex-col border-r border-gray-200 fixed left-0 top-0 transition-all duration-300`}>
+    <div className={`${isCollapsed && !isMobile ? 'w-20' : 'w-64'} bg-white h-screen flex flex-col border-r border-gray-200 ${!isMobile && 'fixed left-0 top-0'} transition-all duration-300`}>
       {/* Logo */}
       <div className="p-6 flex items-center gap-3 justify-between">
         <div className="flex items-center gap-3">
@@ -55,12 +59,14 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           />
           {!isCollapsed && <span className="text-xl font-bold text-gray-800">VerifIDFace</span>}
         </div>
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          {isCollapsed ? <Maximize2 size={18} className="text-gray-600" /> : <Minimize2 size={18} className="text-gray-600" />}
-        </button>
+        {!isMobile && (
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors hidden md:block"
+          >
+            {isCollapsed ? <Maximize2 size={18} className="text-gray-600" /> : <Minimize2 size={18} className="text-gray-600" />}
+          </button>
+        )}
       </div>
 
       {/* Menu Items */}
@@ -71,15 +77,15 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             <button
               key={index}
               onClick={() => handleMenuClick(item.path)}
-              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-1 transition-colors ${
+              className={`w-full flex items-center ${isCollapsed && !isMobile ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg mb-1 transition-colors ${
                 isActive
                   ? 'bg-blue-500 text-white'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
-              title={isCollapsed ? item.label : ''}
+              title={isCollapsed && !isMobile ? item.label : ''}
             >
               <item.icon size={20} />
-              {!isCollapsed && <span className="font-medium">{item.label}</span>}
+              {!(isCollapsed && !isMobile) && <span className="font-medium">{item.label}</span>}
             </button>
           );
         })}
@@ -89,11 +95,11 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       <div className="p-4">
         <button 
           onClick={handleLogout}
-          className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors`}
-          title={isCollapsed ? 'Logout' : ''}
+          className={`w-full flex items-center ${isCollapsed && !isMobile ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors`}
+          title={isCollapsed && !isMobile ? 'Logout' : ''}
         >
           <LogOut size={20} />
-          {!isCollapsed && <span className="font-medium">Logout</span>}
+          {!(isCollapsed && !isMobile) && <span className="font-medium">Logout</span>}
         </button>
       </div>
     </div>

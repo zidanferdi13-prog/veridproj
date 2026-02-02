@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Sidebar, Header } from "@components";
+import { MainLayout } from "@components";
 import { RotateCcw } from "lucide-react";
 import {
   WorkTimeModal,
@@ -19,7 +19,6 @@ import { getAttendance } from "../utils/api/attendance";
 
 const AttendancePage = ({ initialTab }) => {
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const initial =
     (location && location.state && location.state.initialTab) ||
     initialTab ||
@@ -168,15 +167,8 @@ const AttendancePage = ({ initialTab }) => {
   } 
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-
-      <div
-        className={`flex-1 ${isCollapsed ? "ml-20" : "ml-64"} flex flex-col overflow-hidden transition-all duration-300`}
-      >
-        <Header />
-
-        <main className="flex-1 overflow-y-auto p-8">
+    <MainLayout>
+      <main className="flex-1 overflow-y-auto p-8">
           {/* Tabs */}
           <div className="flex gap-4 mb-6">
             <button
@@ -447,8 +439,7 @@ const AttendancePage = ({ initialTab }) => {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 
