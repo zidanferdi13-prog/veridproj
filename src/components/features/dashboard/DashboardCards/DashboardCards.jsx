@@ -1,8 +1,19 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Users, TrendingUp, ArrowUpRight } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CheckCircle2, Users, TrendingUp, ArrowUpRight } from "lucide-react";
+import { deviceActive } from "../../../../utils/api/dashboard";
 
-const StatCard = ({ icon: Icon, title, value, subtitle, trend, bgColor, onTrendClick }) => {
+const StatCard = ({
+  icon: Icon,
+  title,
+  value,
+  subtitle,
+  trend,
+  bgColor,
+  onTrendClick,
+}) => {
+  console.log(">>>> disini", value);
+
   return (
     <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-4 gap-2">
@@ -10,10 +21,12 @@ const StatCard = ({ icon: Icon, title, value, subtitle, trend, bgColor, onTrendC
           <div className={`p-2 rounded-lg ${bgColor}`}>
             <Icon size={20} className="text-gray-700 md:w-6 md:h-6" />
           </div>
-          <h3 className="text-xs md:text-sm text-gray-600 font-medium">{title}</h3>
+          <h3 className="text-xs md:text-sm text-gray-600 font-medium">
+            {title}
+          </h3>
         </div>
         {trend && (
-          <button 
+          <button
             onClick={onTrendClick}
             className="p-1.5 md:p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors flex-shrink-0"
           >
@@ -22,8 +35,14 @@ const StatCard = ({ icon: Icon, title, value, subtitle, trend, bgColor, onTrendC
         )}
       </div>
       <div className="flex items-end gap-2">
-        <span className="text-2xl md:text-4xl font-bold text-gray-800">{value}</span>
-        {subtitle && <span className="text-xs md:text-sm text-gray-500 mb-1">{subtitle}</span>}
+        <span className="text-2xl md:text-4xl font-bold text-gray-800">
+          {value}
+        </span>
+        {subtitle && (
+          <span className="text-xs md:text-sm text-gray-500 mb-1">
+            {subtitle}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -36,7 +55,9 @@ const TopEmployeeCard = () => {
         <div className="p-2 rounded-lg bg-gray-100">
           <Users size={20} className="text-gray-700 md:w-6 md:h-6" />
         </div>
-        <h3 className="text-xs md:text-sm text-gray-600 font-medium">Top Employee</h3>
+        <h3 className="text-xs md:text-sm text-gray-600 font-medium">
+          Top Employee
+        </h3>
       </div>
       <div className="flex items-center gap-2 md:gap-3 bg-blue-50 rounded-lg p-2 md:p-3">
         <img
@@ -44,7 +65,9 @@ const TopEmployeeCard = () => {
           alt="Zidan Ferdiansyah"
           className="w-8 h-8 md:w-10 md:h-10 rounded-full flex-shrink-0"
         />
-        <span className="text-xs md:text-base text-blue-600 font-semibold truncate">Zidan Ferdiansyah</span>
+        <span className="text-xs md:text-base text-blue-600 font-semibold truncate">
+          Zidan Ferdiansyah
+        </span>
       </div>
     </div>
   );
@@ -52,16 +75,33 @@ const TopEmployeeCard = () => {
 
 const DashboardCards = () => {
   const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const res = await deviceActive();
+        setDashboardData(res.data.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
       <StatCard
         icon={CheckCircle2}
         title="Device Active"
-        value="5"
+        value={dashboardData?.devices.online}
         trend={true}
         bgColor="bg-gray-100"
-        onTrendClick={() => navigate('/device')}
+        onTrendClick={() => navigate("/device")}
       />
       <StatCard
         icon={Users}
@@ -70,7 +110,7 @@ const DashboardCards = () => {
         subtitle="/200"
         trend={true}
         bgColor="bg-gray-100"
-        onTrendClick={() => navigate('/attendance')}
+        onTrendClick={() => navigate("/attendance")}
       />
       <TopEmployeeCard />
     </div>

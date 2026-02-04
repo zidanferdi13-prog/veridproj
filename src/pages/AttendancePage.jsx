@@ -168,277 +168,275 @@ const AttendancePage = ({ initialTab }) => {
 
   return (
     <MainLayout>
-      <main className="flex-1 overflow-y-auto p-8">
-          {/* Tabs */}
-          <div className="flex gap-4 mb-6">
-            <button
-              onClick={() => setActiveTab("details")}
-              className={`px-6 py-2.5 rounded-t-lg font-medium transition-colors ${
-                activeTab === "details"
-                  ? "bg-white text-blue-500 border-b-2 border-blue-500"
-                  : "bg-transparent text-gray-600 hover:bg-white"
-              }`}
-            >
-              Attendance details
-            </button>
-            <button
-              onClick={() => setActiveTab("statistics")}
-              className={`px-6 py-2.5 rounded-t-lg font-medium transition-colors ${
-                activeTab === "statistics"
-                  ? "bg-white text-blue-500 border-b-2 border-blue-500"
-                  : "bg-transparent text-gray-600 hover:bg-white"
-              }`}
-            >
-              Attendance statistics
-            </button>
-          </div>
+      {/* Tabs */}
+      <div className="flex gap-2 md:gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab("details")}
+          className={`px-4 md:px-6 py-2 md:py-2.5 rounded-t-lg font-medium transition-colors text-sm md:text-base ${
+            activeTab === "details"
+              ? "bg-white text-blue-500 border-b-2 border-blue-500"
+              : "bg-transparent text-gray-600 hover:bg-white"
+          }`}
+        >
+          Attendance details
+        </button>
+        <button
+          onClick={() => setActiveTab("statistics")}
+          className={`px-4 md:px-6 py-2 md:py-2.5 rounded-t-lg font-medium transition-colors text-sm md:text-base ${
+            activeTab === "statistics"
+              ? "bg-white text-blue-500 border-b-2 border-blue-500"
+              : "bg-transparent text-gray-600 hover:bg-white"
+          }`}
+        >
+          Attendance statistics
+        </button>
+      </div>
 
-          {/* Filters */}
-          <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Group
-                </label>
-                <select
-                  value={filters.group}
-                  onChange={(e) => handleFilterChange("group", e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Please enter"
-                  value={filters.name}
-                  onChange={(e) => handleFilterChange("name", e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  placeholder="Please enter"
-                  value={filters.phone}
-                  onChange={(e) => handleFilterChange("phone", e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={filters.startDate}
-                    onChange={(e) =>
-                      handleFilterChange("startDate", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-gray-500">To</span>
-                  <input
-                    type="date"
-                    value={filters.endDate}
-                    onChange={(e) =>
-                      handleFilterChange("endDate", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
+      {/* Filters */}
+      <div className="bg-white rounded-lg p-4 md:p-6 mb-6 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-4">
+          <div>
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
+              Group
+            </label>
+            <select
+              value={filters.group}
+              onChange={(e) => handleFilterChange("group", e.target.value)}
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              <option value="">Select</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
+              Name
+            </label>
+            <input
+              type="text"
+              placeholder="Please enter"
+              value={filters.name}
+              onChange={(e) => handleFilterChange("name", e.target.value)}
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
+              Phone
+            </label>
+            <input
+              type="text"
+              placeholder="Please enter"
+              value={filters.phone}
+              onChange={(e) => handleFilterChange("phone", e.target.value)}
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+          </div>
+          <div className="col-span-1 md:col-span-2 lg:col-span-3">
+            <label className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
+              Time
+            </label>
+            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-3">
+              <input
+                type="date"
+                value={filters.startDate}
+                onChange={(e) =>
+                  handleFilterChange("startDate", e.target.value)
+                }
+                className="w-full md:flex-1 px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+              <span className="text-gray-500 hidden md:inline">To</span>
+              <input
+                type="date"
+                value={filters.endDate}
+                onChange={(e) =>
+                  handleFilterChange("endDate", e.target.value)
+                }
+                className="w-full md:flex-1 px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
             </div>
-            <div className="flex gap-3">
-              <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center gap-2">
-                <span>🔍</span>
-                Search
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row gap-2 md:gap-3">
+          <button className="px-4 md:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium flex items-center justify-center gap-2 text-sm md:text-base">
+            <span>🔍</span>
+            <span>Search</span>
+          </button>
+          <button
+            onClick={handleReset}
+            className="px-4 md:px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2 text-sm md:text-base"
+          >
+            <RotateCcw size={16} />
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mb-6 flex flex-wrap gap-2 md:gap-3">
+        <button
+          onClick={() => setIsWorkModalOpen(true)}
+          className="px-3 md:px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200 text-sm md:text-base"
+        >
+          ⚙️ Work time settings
+        </button>
+        <button
+          onClick={() => setIsExportConfirmOpen(true)}
+          className="px-3 md:px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors font-medium border border-orange-200 text-sm md:text-base"
+        >
+          📥 Export
+        </button>
+      </div>
+
+      {/* Modals */}
+      <WorkTimeModal
+        isOpen={isWorkModalOpen}
+        onClose={() => setIsWorkModalOpen(false)}
+        onConfirm={handleWorkConfirm}
+        initialStart={workTime.start}
+        initialEnd={workTime.end}
+      />
+
+      <ExportConfirmModal
+        isOpen={isExportConfirmOpen}
+        onClose={() => setIsExportConfirmOpen(false)}
+        onConfirm={handleExport}
+        message={`Date range: ${filters.startDate}-${filters.endDate}, Personnel count: ${attendanceData.length}. Are you sure to export?`}
+      />
+
+      {/* Table */}
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-max min-w-full">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Name
+                </th>
+                {/* <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Group
+                </th> */}
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Phone
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Date
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Clock in
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Device In
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Clock out
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Device Out
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Duration (H)
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Lateness Duration (H)
+                </th>
+                <th className="text-left py-4 px-6 text-gray-700 font-semibold">
+                  Departure Duration (H)
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="11"
+                    className="py-12 text-center text-gray-400"
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              ) : attendanceData.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="11"
+                    className="py-12 text-center text-gray-400"
+                  >
+                    No data available
+                  </td>
+                </tr>
+              ) : (
+                attendanceData.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="py-4 px-6">{item.name}</td>
+                    {/* <td className="py-4 px-6">
+                      {item.group || "tidak ada"}
+                    </td> */}
+                    <td className="py-4 px-6">{item.mobile}</td>
+                    <td className="py-4 px-6">{(item.attendance_date).split('T')[0]}</td>
+                    <td className="py-4 px-6">{item.time_in}</td>
+                    <td className="py-4 px-6">{item.device_in || "-"}</td>
+                    <td className="py-4 px-6">{item.time_out}</td>
+                    <td className="py-4 px-6">{item.device_out || "-"}</td>
+
+                    {/* belum bisa karena string mungkin */}
+                    <td className="py-4 px-6">
+                      {getDurationHours(item.time_in, item.time_out)}
+                    </td>
+                    <td className="py-4 px-6">
+                      {getLatenessHours(item.time_in)}
+                    </td>
+                    <td className="py-4 px-6">
+                      {getDepartureHours(item.time_out)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+          <div className="text-sm text-gray-600">
+            Total{" "}
+            <span className="font-semibold">{attendanceData.length}</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <select className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>20/page</option>
+              <option>50/page</option>
+              <option>100/page</option>
+            </select>
+            <div className="flex items-center gap-2">
+              <button
+                className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                disabled
+              >
+                &lt;
+              </button>
+              <button className="px-3 py-1 bg-blue-500 text-white rounded-lg">
+                1
               </button>
               <button
-                onClick={handleReset}
-                className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+                className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled
               >
-                <RotateCcw size={16} />
-                Reset
+                &gt;
               </button>
             </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="mb-6 flex flex-wrap gap-3">
-            <button
-              onClick={() => setIsWorkModalOpen(true)}
-              className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium border border-blue-200"
-            >
-              ⚙️ Work time settings
-            </button>
-            <button
-              onClick={() => setIsExportConfirmOpen(true)}
-              className="px-4 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors font-medium border border-orange-200"
-            >
-              📥 Export
-            </button>
-          </div>
-
-          {/* Modals */}
-          <WorkTimeModal
-            isOpen={isWorkModalOpen}
-            onClose={() => setIsWorkModalOpen(false)}
-            onConfirm={handleWorkConfirm}
-            initialStart={workTime.start}
-            initialEnd={workTime.end}
-          />
-
-          <ExportConfirmModal
-            isOpen={isExportConfirmOpen}
-            onClose={() => setIsExportConfirmOpen(false)}
-            onConfirm={handleExport}
-            message={`Date range: ${filters.startDate}-${filters.endDate}, Personnel count: ${attendanceData.length}. Are you sure to export?`}
-          />
-
-          {/* Table */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-max min-w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Name
-                    </th>
-                    {/* <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Group
-                    </th> */}
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Phone
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Date
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Clock in
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Device In
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Clock out
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Device Out
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Duration (H)
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Lateness Duration (H)
-                    </th>
-                    <th className="text-left py-4 px-6 text-gray-700 font-semibold">
-                      Departure Duration (H)
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td
-                        colSpan="11"
-                        className="py-12 text-center text-gray-400"
-                      >
-                        Loading...
-                      </td>
-                    </tr>
-                  ) : attendanceData.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="11"
-                        className="py-12 text-center text-gray-400"
-                      >
-                        No data available
-                      </td>
-                    </tr>
-                  ) : (
-                    attendanceData.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="py-4 px-6">{item.name}</td>
-                        {/* <td className="py-4 px-6">
-                          {item.group || "tidak ada"}
-                        </td> */}
-                        <td className="py-4 px-6">{item.mobile}</td>
-                        <td className="py-4 px-6">{(item.attendance_date).split('T')[0]}</td>
-                        <td className="py-4 px-6">{item.time_in}</td>
-                        <td className="py-4 px-6">{item.device_in || "-"}</td>
-                        <td className="py-4 px-6">{item.time_out}</td>
-                        <td className="py-4 px-6">{item.device_out || "-"}</td>
-
-                        {/* belum bisa karena string mungkin */}
-                        <td className="py-4 px-6">
-                          {getDurationHours(item.time_in, item.time_out)}
-                        </td>
-                        <td className="py-4 px-6">
-                          {getLatenessHours(item.time_in)}
-                        </td>
-                        <td className="py-4 px-6">
-                          {getDepartureHours(item.time_out)}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-              <div className="text-sm text-gray-600">
-                Total{" "}
-                <span className="font-semibold">{attendanceData.length}</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <select className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>20/page</option>
-                  <option>50/page</option>
-                  <option>100/page</option>
-                </select>
-                <div className="flex items-center gap-2">
-                  <button
-                    className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                    disabled
-                  >
-                    &lt;
-                  </button>
-                  <button className="px-3 py-1 bg-blue-500 text-white rounded-lg">
-                    1
-                  </button>
-                  <button
-                    className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    disabled
-                  >
-                    &gt;
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Go to</span>
-                  <input
-                    type="number"
-                    defaultValue={1}
-                    className="w-16 px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Go to</span>
+              <input
+                type="number"
+                defaultValue={1}
+                className="w-16 px-2 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
-        </main>
+        </div>
+      </div>
     </MainLayout>
   );
 };
