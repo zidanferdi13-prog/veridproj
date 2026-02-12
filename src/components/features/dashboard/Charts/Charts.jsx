@@ -5,11 +5,22 @@ import { attendanceService } from '@api';
 
 const AttendanceTrendChart = () => {
   const [activeFilter, setActiveFilter] = useState('Daily');
-  const [attendanceData, setAttendanceData] = useState([]);
+  const [attendanceData, setAttendanceData] = useState([
+    { time: '00:00', value: 5 },
+    { time: '06:00', value: 45 },
+    { time: '08:00', value: 120 },
+    { time: '10:00', value: 110 },
+    { time: '12:00', value: 95 },
+    { time: '14:00', value: 100 },
+    { time: '16:00', value: 80 },
+    { time: '18:00', value: 35 },
+  ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch attendance trend data
+  // Using dummy data only (API fetch disabled temporarily)
+  // To enable API fetching, uncomment the code below
+  /*
   useEffect(() => {
     fetchAttendanceTrend();
   }, [activeFilter]);
@@ -17,29 +28,23 @@ const AttendanceTrendChart = () => {
   const fetchAttendanceTrend = async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const response = await attendanceService.getAttendanceTrend({ period: activeFilter });
-      
-      // Handle different response formats
       if (response.attendanceData) {
         setAttendanceData(response.attendanceData);
       } else if (response.data) {
         setAttendanceData(response.data);
       } else if (Array.isArray(response)) {
         setAttendanceData(response);
-      } else {
-        setAttendanceData([]);
       }
     } catch (err) {
       console.error('Failed to fetch attendance trend:', err);
       setError(err.message);
-      // Fallback to empty data or default data
-      setAttendanceData([]);
     } finally {
       setLoading(false);
     }
   };
+  */
 
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -109,7 +114,9 @@ const TodayRecapChart = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch recap data
+  // Using dummy data only (API fetch disabled temporarily)
+  // To enable API fetching, uncomment the code below
+  /*
   useEffect(() => {
     fetchTodayRecap();
   }, [activeFilter]);
@@ -117,33 +124,23 @@ const TodayRecapChart = () => {
   const fetchTodayRecap = async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const response = await attendanceService.getTodayRecap({ period: activeFilter });
-      
-      // Handle different response formats
       if (response.recapData) {
         setRecapData(response.recapData);
       } else if (response.data) {
         setRecapData(response.data);
       } else if (Array.isArray(response)) {
         setRecapData(response);
-      } else {
-        // Keep default data if response is empty
-        setRecapData([
-          { name: 'Ontime', value: 100, color: '#3B82F6' },
-          { name: 'Late', value: 26, color: '#60A5FA' },
-          { name: 'Sick', value: 10, color: '#93C5FD' },
-        ]);
       }
     } catch (err) {
       console.error('Failed to fetch today recap:', err);
       setError(err.message);
-      // Keep default data on error
     } finally {
       setLoading(false);
     }
   };
+  */
 
   return (
     <div className="bg-white rounded-lg p-6 border border-gray-200">
