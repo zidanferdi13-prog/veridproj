@@ -27,14 +27,13 @@ const AttendancePage = ({ initialTab }) => {
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchAttendance();
-  }, []);
-
   const fetchAttendance = async () => {
     setLoading(true);
     try {
-      const res = await getAttendance();
+      const res = await getAttendance({
+        tanggalawal: filters.startDate,
+        tanggalakhir: filters.endDate,
+      });
       console.log("attendance res", res.data.data);
 
       setAttendanceData(res.data.data || []);
@@ -60,6 +59,11 @@ const AttendancePage = ({ initialTab }) => {
   const [isWorkModalOpen, setIsWorkModalOpen] = useState(false);
   const [isExportConfirmOpen, setIsExportConfirmOpen] = useState(false);
   const [workTime, setWorkTime] = useState({ start: "09:00", end: "18:00" });
+
+  // Refetch saat filter tanggal berubah (juga berjalan saat mount)
+  useEffect(() => {
+    fetchAttendance();
+  }, [filters.startDate, filters.endDate]);
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));

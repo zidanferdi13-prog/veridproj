@@ -1,55 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@components';
 import { RotateCcw } from 'lucide-react';
 import { ExportLogModal, ResendPermissionModal } from '@components/features/log/modals';
-
-const logData = [
-  {
-    id: 1,
-    name: '-',
-    userType: '-',
-    phoneEmail: '-',
-    passTime: '2025-10-18 ...',
-    device: 'Veridface',
-    sn: 'J257280001',
-    accessType: 'Face',
-    credential: 'stranger',
-    result: 'Fail',
-    capture: '/api/placeholder/50/50'
-  },
-  {
-    id: 2,
-    name: 'David Beckh...',
-    userType: 'organization',
-    phoneEmail: 'yazid@veridf...',
-    passTime: '2025-10-18 ...',
-    device: 'Veridface',
-    sn: 'J257280001',
-    accessType: 'Face',
-    credential: '9mjmdtwk4q...',
-    result: 'Success',
-    capture: '/api/placeholder/50/50'
-  },
-  {
-    id: 3,
-    name: 'David Beckh...',
-    userType: 'organization',
-    phoneEmail: 'yazid@veridf...',
-    passTime: '2025-10-18 ...',
-    device: 'Veridface',
-    sn: 'J257280001',
-    accessType: 'Face',
-    credential: '9mjmdtwk4q...',
-    result: 'Success',
-    capture: '/api/placeholder/50/50'
-  },
-];
+import { getAccessLogs, getAuthorizationLogs, getOperationLogs, getAlarmLogs } from '../utils/api/log';
 
 const LogPage = () => {
   const [activeTab, setActiveTab] = useState('access');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isResendModalOpen, setIsResendModalOpen] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState([]);
+  const [logData, setLogData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
   // Filters untuk Access records
   const [accessFilters, setAccessFilters] = useState({
@@ -102,6 +64,99 @@ const LogPage = () => {
       setOperationFilters(prev => ({ ...prev, [field]: value }));
     } else if (activeTab === 'alarm') {
       setAlarmFilters(prev => ({ ...prev, [field]: value }));
+    }
+  };
+
+  // Fetch log data berdasarkan tab aktif
+  useEffect(() => {
+    fetchLogs();
+  }, [activeTab]);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let res;
+      if (activeTab === 'access') {
+        const params = {};
+        if (accessFilters.startDate) params.start_date = accessFilters.startDate;
+        if (accessFilters.endDate) params.end_date = accessFilters.endDate;
+        if (accessFilters.name) params.user_name = accessFilters.name;
+        if (accessFilters.result) params.result_filter = accessFilters.result;
+        res = await getAccessLogs(params);
+        const raw = res.data.data || [];
+        console.log("data res access logs", raw);
+        setLogData(raw.map((item, idx) => ({
+          id: idx + 1,
+          name: item.user_name || '-',
+          userType: item.user_type || '-',
+          phoneEmail: item.phone || item.email || '-',
+          passTime: item.pass_datetime || '-',
+          device: item.device_name || '-',
+          sn: item.device_sn || '-',
+          accessType: item.access_type || '-',
+          credential: item.credential || '-',
+          result: item.result_status || '-',
+          capture: item.pic_url || null,
+        })));
+      } else if (activeTab === 'authorization') {
+        const params = {};
+        if (authFilters.startDate) params.start_date = authFilters.startDate;
+        if (authFilters.endDate) params.end_date = authFilters.endDate;
+        if (authFilters.result) params.result_filter = authFilters.result;
+        res = await getAuthorizationLogs(params);
+        const raw = res.data.data || [];
+        console.log("data res auth logs", raw);
+        setLogData(raw.map((item, idx) => ({
+          id: idx + 1,
+          device: item.device_name || '-',
+          sn: item.device_sn || '-',
+          model: item.device_model || '-',
+          groups: item.groups || '-',
+          username: item.user_name || '-',
+          type: item.access_type || '-',
+          credential: item.credential || '-',
+          result: item.result_status || '-',
+          interval: item.interval || '-',
+          reason: item.reason || '-',
+        })));
+      } else if (activeTab === 'operation') {
+        const params = {};
+        if (operationFilters.startDate) params.start_date = operationFilters.startDate;
+        if (operationFilters.endDate) params.end_date = operationFilters.endDate;
+        res = await getOperationLogs(params);
+        const raw = res.data.data || [];
+        console.log("data res operation logs", raw);
+        setLogData(raw.map((item, idx) => ({
+          id: idx + 1,
+          name: item.operator_name || '-',
+          phone: item.phone || '-',
+          functionalModule: item.functional_module || '-',
+          operationContent: item.operation_content || '-',
+          operationIp: item.operation_ip || '-',
+          operationTime: item.operation_time || '-',
+        })));
+      } else if (activeTab === 'alarm') {
+        const params = {};
+        if (alarmFilters.startDate) params.start_date = alarmFilters.startDate;
+        if (alarmFilters.endDate) params.end_date = alarmFilters.endDate;
+        res = await getAlarmLogs(params);
+        const raw = res.data.data || [];
+        console.log("data res alarm logs", raw);
+        setLogData(raw.map((item, idx) => ({
+          id: idx + 1,
+          sn: item.device_sn || '-',
+          area: item.area || '-',
+          alarmLevel: item.alarm_level || '-',
+          alarmType: item.alarm_type || '-',
+          alarmTime: item.alarm_time || '-',
+        })));
+      }
+    } catch (err) {
+      console.error("Fetch log gagal", err);
+      setLogData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -499,6 +554,12 @@ const LogPage = () => {
   };
 
   const renderTable = () => {
+    if (loading) {
+      return (
+        <div className="py-12 text-center text-gray-500 text-sm">Loading...</div>
+      );
+    }
+
     if (activeTab === 'access') {
       return (
         <table className="w-full">
@@ -517,7 +578,11 @@ const LogPage = () => {
             </tr>
           </thead>
           <tbody>
-            {logData.map((log) => (
+            {logData.length === 0 ? (
+              <tr>
+                <td colSpan="10" className="py-12 text-center text-gray-400">No data available</td>
+              </tr>
+            ) : logData.map((log) => (
               <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="py-4 px-6 text-gray-700">{log.name}</td>
                 <td className="py-4 px-6 text-gray-700">{log.userType}</td>
@@ -537,11 +602,15 @@ const LogPage = () => {
                   </span>
                 </td>
                 <td className="py-4 px-6">
-                  <img 
-                    src={log.capture} 
-                    alt="Capture" 
-                    className="w-12 h-12 rounded object-cover"
-                  />
+                  {log.capture ? (
+                    <img
+                      src={log.capture}
+                      alt="Capture"
+                      className="w-12 h-12 rounded object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-400 text-sm">-</span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -566,9 +635,24 @@ const LogPage = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td colSpan="10" className="py-12 text-center text-gray-400">No data available</td>
-            </tr>
+            {logData.length === 0 ? (
+              <tr>
+                <td colSpan="10" className="py-12 text-center text-gray-400">No data available</td>
+              </tr>
+            ) : logData.map((log) => (
+              <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td className="py-4 px-6 text-gray-700">{log.device}</td>
+                <td className="py-4 px-6 text-gray-700">{log.sn}</td>
+                <td className="py-4 px-6 text-gray-700">{log.model}</td>
+                <td className="py-4 px-6 text-gray-700">{log.groups}</td>
+                <td className="py-4 px-6 text-gray-700">{log.username}</td>
+                <td className="py-4 px-6 text-gray-700">{log.type}</td>
+                <td className="py-4 px-6 text-gray-700">{log.credential}</td>
+                <td className="py-4 px-6 text-gray-700">{log.result}</td>
+                <td className="py-4 px-6 text-gray-700">{log.interval}</td>
+                <td className="py-4 px-6 text-gray-700">{log.reason}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       );
@@ -586,9 +670,20 @@ const LogPage = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td colSpan="6" className="py-12 text-center text-gray-400">No data available</td>
-            </tr>
+            {logData.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="py-12 text-center text-gray-400">No data available</td>
+              </tr>
+            ) : logData.map((log) => (
+              <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td className="py-4 px-6 text-gray-700">{log.name}</td>
+                <td className="py-4 px-6 text-gray-700">{log.phone}</td>
+                <td className="py-4 px-6 text-gray-700">{log.functionalModule}</td>
+                <td className="py-4 px-6 text-gray-700">{log.operationContent}</td>
+                <td className="py-4 px-6 text-gray-700">{log.operationIp}</td>
+                <td className="py-4 px-6 text-gray-700">{log.operationTime}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       );
@@ -605,38 +700,19 @@ const LogPage = () => {
             </tr>
           </thead>
           <tbody>
-            {activeTab === 'alarm' && (
-              <>
-                <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-6 text-gray-700">J257280001</td>
-                  <td className="py-4 px-6 text-gray-700">Veridface</td>
-                  <td className="py-4 px-6 text-gray-700">Medium</td>
-                  <td className="py-4 px-6 text-gray-700">Device offline</td>
-                  <td className="py-4 px-6 text-gray-700">2025-10-18 11:19:27</td>
-                </tr>
-                <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-6 text-gray-700">J257280001</td>
-                  <td className="py-4 px-6 text-gray-700">Veridface</td>
-                  <td className="py-4 px-6 text-gray-700">Low</td>
-                  <td className="py-4 px-6 text-gray-700">Device online</td>
-                  <td className="py-4 px-6 text-gray-700">2025-10-18 11:07:21</td>
-                </tr>
-                <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-6 text-gray-700">J257280001</td>
-                  <td className="py-4 px-6 text-gray-700">Veridface</td>
-                  <td className="py-4 px-6 text-gray-700">Medium</td>
-                  <td className="py-4 px-6 text-gray-700">Device offline</td>
-                  <td className="py-4 px-6 text-gray-700">2025-10-18 11:07:07</td>
-                </tr>
-                <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-6 text-gray-700">J257280001</td>
-                  <td className="py-4 px-6 text-gray-700">Veridface</td>
-                  <td className="py-4 px-6 text-gray-700">Low</td>
-                  <td className="py-4 px-6 text-gray-700">Device online</td>
-                  <td className="py-4 px-6 text-gray-700">2025-10-18 11:05:36</td>
-                </tr>
-              </>
-            )}
+            {logData.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="py-12 text-center text-gray-400">No data available</td>
+              </tr>
+            ) : logData.map((log) => (
+              <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td className="py-4 px-6 text-gray-700">{log.sn}</td>
+                <td className="py-4 px-6 text-gray-700">{log.area}</td>
+                <td className="py-4 px-6 text-gray-700">{log.alarmLevel}</td>
+                <td className="py-4 px-6 text-gray-700">{log.alarmType}</td>
+                <td className="py-4 px-6 text-gray-700">{log.alarmTime}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       );
@@ -776,7 +852,7 @@ const LogPage = () => {
             {/* Pagination */}
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
               <div className="text-sm text-gray-600">
-                Total <span className="font-semibold">{activeTab === 'alarm' ? '4' : activeTab === 'access' ? logData.length : '0'}</span>
+              Total <span className="font-semibold">{logData.length}</span>
               </div>
               <div className="flex items-center gap-4">
                 <select className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
