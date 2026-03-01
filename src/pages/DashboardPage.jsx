@@ -10,19 +10,24 @@ import { deviceActive } from "../utils/api/dashboard";
 const DashboardPage = () => {
   const [dashboardData, setDashboardData] = useState();
 
-  // useEffect(() => {
-  //   console.log("masuk sini");
+  useEffect(() => {
+    getDeviceActive();
 
-  //   getDeviceActive();
-  // }, []);
+    // Refresh data setiap 30 detik
+    const interval = setInterval(() => {
+      getDeviceActive();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getDeviceActive = async () => {
     try {
       const res = await deviceActive();
-      // console.log(res.data.data);
-      setDashboardData(res.data.data)
+      console.log("data res", res.data.data);
+      setDashboardData(res.data.data);
     } catch (error) {
-      console.log(error);
+      console.error("Fetch dashboard failed", error);
     }
   };
 

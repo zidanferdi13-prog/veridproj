@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@components';
 
 const SettingsPage = () => {
@@ -6,6 +6,21 @@ const SettingsPage = () => {
   const [qrCodeType, setQrCodeType] = useState('dynamic');
   const [timezone, setTimezone] = useState('Asia/Shanghai (UTC+8)');
   const [callbackSettings, setCallbackSettings] = useState('');
+
+  // Ambil data user dari localStorage (disimpan saat login)
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setCurrentUser(user);
+      }
+    } catch (error) {
+      console.error("Gagal membaca data user dari localStorage", error);
+    }
+  }, []);
 
   return (
     <MainLayout>
@@ -43,11 +58,11 @@ const SettingsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6 mb-6">
                 <div className="bg-gray-50 rounded-lg p-3 md:p-4">
                   <div className="text-xs md:text-sm text-gray-600 mb-2">Organization administrator</div>
-                  <div className="text-gray-800 font-medium text-sm md:text-base">David Beckham</div>
+                  <div className="text-gray-800 font-medium text-sm md:text-base">{currentUser?.name || 'David Beckham'}</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3 md:p-4">
                   <div className="text-xs md:text-sm text-gray-600 mb-2">Administrator's mail</div>
-                  <div className="text-gray-800 font-medium text-sm md:text-base">yazid@veridface.com</div>
+                  <div className="text-gray-800 font-medium text-sm md:text-base">{currentUser?.email || 'yazid@veridface.com'}</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3 md:p-4">
                   <div className="text-xs md:text-sm text-gray-600 mb-2">Organization name</div>

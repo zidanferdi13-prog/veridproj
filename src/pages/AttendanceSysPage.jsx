@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@components';
 import { Calendar } from 'lucide-react';
+import {
+  getAttendanceSysGroups,
+  addAttendanceSysGroup,
+  deleteAttendanceSysGroup,
+  updateAttendanceSysGroup,
+  getAttendanceSysStats,
+} from '../utils/api/attendancesys';
 
 const AttendanceSysPage = () => {
   const [selectedDate, setSelectedDate] = useState('2025-12-09');
@@ -9,17 +16,74 @@ const AttendanceSysPage = () => {
   const [selectedSection, setSelectedSection] = useState('home');
   const [isSettingsOpen, setIsSettingsOpen] = useState(true);
 
+  // ==================== STATE ====================
+  const [groups, setGroups] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [stats, setStats] = useState({});
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+
+  // Fetch groups dan stats saat mount dan saat selectedDate berubah
+  useEffect(() => {
+    fetchGroups();
+    fetchStats();
+  }, [selectedDate]);
+
+  const fetchGroups = async () => {
+    setLoadingGroups(true);
+    try {
+      const res = await getAttendanceSysGroups();
+      console.log("data res groups", res.data.data);
+      setGroups(res.data.data || []);
+    } catch (error) {
+      console.error("Fetch groups gagal", error);
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    setLoadingStats(true);
+    try {
+      const res = await getAttendanceSysStats(selectedDate);
+      console.log("data res stats", res.data.data);
+      setStats(res.data.data || {});
+    } catch (error) {
+      console.error("Fetch stats gagal", error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  const handleAddGroup = async (groupData) => {
+    try {
+      await addAttendanceSysGroup(groupData);
+      fetchGroups();
+    } catch (error) {
+      console.error("Add group gagal", error);
+    }
+  };
+
+  const handleDeleteGroup = async (id) => {
+    try {
+      await deleteAttendanceSysGroup(id);
+      fetchGroups();
+    } catch (error) {
+      console.error("Delete group gagal", error);
+    }
+  };
+
   const statsCards = [
-    { label: 'Expected Attendance', count: '0Persons', color: 'bg-teal-400', icon: '📊' },
-    { label: 'Already Attended', count: '0Persons', color: 'bg-blue-400', icon: '✓' },
-    { label: 'Checked In', count: '0Persons', color: 'bg-purple-400', icon: '✓' },
-    { label: 'Checked Out', count: '0Persons', color: 'bg-pink-400', icon: '✓' },
-    { label: 'Card Adjustments', count: '0Persons', color: 'bg-gray-300', icon: '🔄' },
-    { label: 'Late Arrivals', count: '0Persons', color: 'bg-orange-300', icon: '⏰' },
-    { label: 'Early Departures', count: '0Persons', color: 'bg-yellow-300', icon: '📅' },
-    { label: 'Not Checked In', count: '0Persons', color: 'bg-orange-400', icon: '📅' },
-    { label: 'Not Checked Out', count: '0Persons', color: 'bg-yellow-400', icon: '📅' },
-    { label: 'Missing Cards', count: '0Persons', color: 'bg-red-400', icon: '📅' },
+    { label: 'Expected Attendance', count: loadingStats ? '...' : `${stats.expected_attendance ?? 0} Persons`, color: 'bg-teal-400', icon: '📊' },
+    { label: 'Already Attended', count: loadingStats ? '...' : `${stats.already_attended ?? 0} Persons`, color: 'bg-blue-400', icon: '✓' },
+    { label: 'Checked In', count: loadingStats ? '...' : `${stats.checked_in ?? 0} Persons`, color: 'bg-purple-400', icon: '✓' },
+    { label: 'Checked Out', count: loadingStats ? '...' : `${stats.checked_out ?? 0} Persons`, color: 'bg-pink-400', icon: '✓' },
+    { label: 'Card Adjustments', count: loadingStats ? '...' : `${stats.card_adjustments ?? 0} Persons`, color: 'bg-gray-300', icon: '🔄' },
+    { label: 'Late Arrivals', count: loadingStats ? '...' : `${stats.late_arrivals ?? 0} Persons`, color: 'bg-orange-300', icon: '⏰' },
+    { label: 'Early Departures', count: loadingStats ? '...' : `${stats.early_departures ?? 0} Persons`, color: 'bg-yellow-300', icon: '📅' },
+    { label: 'Not Checked In', count: loadingStats ? '...' : `${stats.not_checked_in ?? 0} Persons`, color: 'bg-orange-400', icon: '📅' },
+    { label: 'Not Checked Out', count: loadingStats ? '...' : `${stats.not_checked_out ?? 0} Persons`, color: 'bg-yellow-400', icon: '📅' },
+    { label: 'Missing Cards', count: loadingStats ? '...' : `${stats.missing_cards ?? 0} Persons`, color: 'bg-red-400', icon: '📅' },
   ];
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -176,10 +240,25 @@ const AttendanceSysPage = () => {
                       <div className="grid grid-cols-3 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Group Name</label>
-                          <input className="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Please enter" />
+                          <input
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                            placeholder="Please enter"
+                            value={newGroupName}
+                            onChange={(e) => setNewGroupName(e.target.value)}
+                          />
                         </div>
-                        <div className="col-span-2 flex items-end justify-end">
+                        <div className="col-span-2 flex items-end justify-end gap-3">
                           <button className="px-6 py-2 bg-blue-500 text-white rounded-lg">Search</button>
+                          <button
+                            onClick={() => {
+                              if (newGroupName.trim()) {
+                                handleAddGroup({ name: newGroupName.trim() });
+                                setNewGroupName('');
+                              }
+                            }}
+                            className="px-4 py-2 bg-green-50 text-green-600 rounded-lg border border-green-200">
+                            Add
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -197,9 +276,29 @@ const AttendanceSysPage = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
-                              <td colSpan="5" className="py-12 text-center text-gray-400">No Data</td>
-                            </tr>
+                            {loadingGroups ? (
+                              <tr>
+                                <td colSpan="5" className="py-12 text-center text-gray-400">Loading...</td>
+                              </tr>
+                            ) : groups.length === 0 ? (
+                              <tr>
+                                <td colSpan="5" className="py-12 text-center text-gray-400">No Data</td>
+                              </tr>
+                            ) : groups.map((group, idx) => (
+                              <tr key={group.id || idx} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td className="py-4 px-6 text-gray-700">{group.name || group.group_name || '-'}</td>
+                                <td className="py-4 px-6 text-gray-700">{group.attendance_type || '-'}</td>
+                                <td className="py-4 px-6 text-gray-700">{group.attendance_time || '-'}</td>
+                                <td className="py-4 px-6 text-gray-700">{group.member_count ?? '-'}</td>
+                                <td className="py-4 px-6">
+                                  <button
+                                    onClick={() => handleDeleteGroup(group.id)}
+                                    className="px-3 py-1 text-red-600 hover:text-red-800 text-sm">
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
